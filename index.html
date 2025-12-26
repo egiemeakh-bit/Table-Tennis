@@ -16,8 +16,6 @@
             --bronze: #ffb38a; /* Helles Bronze/Kupfer */
             --silver: #e0e0e0;
             --gold: #ffe066;
-            --diamond: #80deea;
-            --platinum: #e1bee7;
         }
 
         * {
@@ -153,7 +151,6 @@
             box-shadow: 0 4px 15px rgba(0,0,0,0.2);
         }
 
-        /* --- CHANGE: Updated .btn-label to Flexbox for alignment --- */
         .btn-label {
             margin-top: 10px;
             font-size: 0.8rem;
@@ -223,12 +220,6 @@
 
         .gold .league-icon { background: var(--gold); color: var(--gold); }
         .gold.active { border-left: 4px solid var(--gold); }
-
-        .diamond .league-icon { background: var(--diamond); color: var(--diamond); }
-        .diamond.active { border-left: 4px solid var(--diamond); }
-
-        .platinum .league-icon { background: var(--platinum); color: var(--platinum); }
-        .platinum.active { border-left: 4px solid var(--platinum); }
 
         /* Mobile Adjustments */
         @media (max-width: 768px) {
@@ -332,17 +323,16 @@
 
     <script>
         // --- Logic Configuration ---
+        // Diamant und Platin entfernt.
         const leagueConfig = [
             { name: "Bronze", class: "bronze" },
             { name: "Silber", class: "silver" },
-            { name: "Gold", class: "gold" },
-            { name: "Diamant", class: "diamond" },
-            { name: "Platin", class: "platinum" }
+            { name: "Gold", class: "gold" }
         ];
 
         let players = [
-            { scores: [0, 0, 0, 0, 0] }, // Player 1
-            { scores: [0, 0, 0, 0, 0] }  // Player 2
+            { scores: [0, 0, 0] }, // Player 1 (nur 3 Ligen)
+            { scores: [0, 0, 0] }  // Player 2
         ];
 
         // --- Core Logic ---
@@ -357,10 +347,27 @@
         }
 
         function addWin(pIdx, leagueIdx) {
+            // Safety check
             if (leagueIdx >= leagueConfig.length) return;
 
             players[pIdx].scores[leagueIdx]++;
 
+            // Prüfen, ob wir in der Gold-Liga sind (Index 2)
+            if (leagueIdx === 2) {
+                // Gold ist unendlich, kein Reset für Gold selbst.
+                
+                // ABER: "Wenn jemand +1 Punkt in der Gold Liga bekommt werden alle anderen Ligen zurückgesetzt."
+                // Alle anderen unter Gold sind Index 0 (Bronze) und 1 (Silber).
+                players[0].scores[0] = 0; // Bronze P1
+                players[0].scores[1] = 0; // Silber P1
+                players[1].scores[0] = 0; // Bronze P2
+                players[1].scores[1] = 0; // Silber P2
+                
+                return; // Keine weitere Rekursion, da Gold das Ende ist.
+            }
+
+            // Normale Logik für Bronze (0) und Silber (1)
+            // Wenn 3 erreicht werden: Reset und nächstes Level erhöhen
             if (players[pIdx].scores[leagueIdx] >= 3) {
                 players[0].scores[leagueIdx] = 0;
                 players[1].scores[leagueIdx] = 0;
