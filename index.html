@@ -59,6 +59,14 @@
                 </select>
                 <input type="text" class="popup-input" id="new-game-title" placeholder="Spieltitel (bei neuem Spiel erforderlich)" style="display: none;">
                 <button class="popup-btn" id="create-game-btn" onclick="createNewGame()" style="display: none;">Spiel erstellen</button>
+                <button class="popup-btn danger" id="delete-game-btn" onclick="showDeleteConfirmation()" style="display: none; margin-top: 10px;">Spiel löschen</button>
+                <div id="delete-confirmation" style="display: none;">
+                    <p style="margin: 15px 0; text-align: center;">Bist du sicher, dass du dieses Spiel löschen möchtest? Diese Aktion kann nicht rückgängig gemacht werden.</p>
+                    <div class="confirmation-buttons">
+                        <button class="popup-btn success" onclick="confirmDelete()">✓</button>
+                        <button class="popup-btn danger" onclick="cancelDelete()">✗</button>
+                    </div>
+                </div>
             </div>
 
             <div class="popup-section">

@@ -162,6 +162,39 @@ async function confirmReset() {
     }
 }
 
+async function confirmDelete() {
+    if (!currentGameId) return;
+    try {
+        const { error } = await supabaseClient.from('games').delete().eq('id', currentGameId);
+        if (error) throw error;
+        
+        // Lösche Bestätigung ausblenden
+        document.getElementById('delete-confirmation').style.display = 'none';
+        
+        // Setze currentGameId zurück
+        currentGameId = null;
+        
+        // Lade Spiele neu und wähle das erste verfügbare oder erstelle ein neues
+        await loadGames();
+        const { data, error: loadError } = await supabaseClient.from('games').select('*').order('created_at', { ascending: false }).limit(1).single();
+        
+        if (data) {
+            currentGameId = data.id;
+            await loadGameData(data.id);
+            document.getElementById('game-select').value = currentGameId;
+        } else {
+            // Kein Spiel vorhanden, erstelle Standard-Spiel
+            await createDefaultGame();
+        }
+        
+        // Aktualisiere UI
+        updateUI();
+    } catch (err) {
+        console.error("Fehler beim Löschen:", err.message);
+        alert('Fehler beim Löschen des Spiels!');
+    }
+}
+
 // Setup real-time subscription
 supabaseClient.channel('db-changes').on('postgres_changes', 
     { event: 'UPDATE', schema: 'public', table: 'games' }, 

@@ -107,11 +107,18 @@ function updatePlayerNames() {
 function openSettings() {
     document.getElementById('settings-popup').classList.add('active');
     updatePlayerNames();
+    // Aktualisiere Delete-Button Sichtbarkeit
+    const select = document.getElementById('game-select');
+    const deleteBtn = document.getElementById('delete-game-btn');
+    if (select && deleteBtn) {
+        deleteBtn.style.display = (select.value && select.value !== '') ? 'block' : 'none';
+    }
 }
 
 function closeSettings() {
     document.getElementById('settings-popup').classList.remove('active');
     document.getElementById('reset-confirmation').style.display = 'none';
+    document.getElementById('delete-confirmation').style.display = 'none';
 }
 
 function openAchievements() {
@@ -126,13 +133,16 @@ function onGameSelect() {
     const select = document.getElementById('game-select');
     const newGameTitle = document.getElementById('new-game-title');
     const createBtn = document.getElementById('create-game-btn');
+    const deleteBtn = document.getElementById('delete-game-btn');
     
     if (select.value === '') {
         newGameTitle.style.display = 'block';
         createBtn.style.display = 'block';
+        deleteBtn.style.display = 'none';
     } else {
         newGameTitle.style.display = 'none';
         createBtn.style.display = 'none';
+        deleteBtn.style.display = 'block';
         currentGameId = parseInt(select.value);
         loadGameData(currentGameId);
     }
@@ -151,6 +161,14 @@ function showResetConfirmation() {
 
 function cancelReset() {
     document.getElementById('reset-confirmation').style.display = 'none';
+}
+
+function showDeleteConfirmation() {
+    document.getElementById('delete-confirmation').style.display = 'block';
+}
+
+function cancelDelete() {
+    document.getElementById('delete-confirmation').style.display = 'none';
 }
 
 // Close popups when clicking outside
