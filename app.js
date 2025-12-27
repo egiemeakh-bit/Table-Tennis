@@ -161,6 +161,43 @@ document.addEventListener('click', (e) => {
     }
 });
 
+// Verhindere Double-Tap-Zoom auf Mobile
+let lastTouchEnd = 0;
+document.addEventListener('touchend', function (event) {
+    const now = Date.now();
+    if (now - lastTouchEnd <= 300) {
+        event.preventDefault();
+    }
+    lastTouchEnd = now;
+}, false);
+
+// Verhindere Pinch-Zoom
+document.addEventListener('gesturestart', function (e) {
+    e.preventDefault();
+});
+
+document.addEventListener('gesturechange', function (e) {
+    e.preventDefault();
+});
+
+document.addEventListener('gestureend', function (e) {
+    e.preventDefault();
+});
+
+// Verhindere Zoom mit Strg+/- oder Cmd+/-
+document.addEventListener('keydown', function(e) {
+    if ((e.ctrlKey || e.metaKey) && (e.keyCode === 61 || e.keyCode === 107 || e.keyCode === 173 || e.keyCode === 109 || e.keyCode === 187 || e.keyCode === 189)) {
+        e.preventDefault();
+    }
+});
+
+// Verhindere Zoom mit Mausrad bei gedrückter Strg/Cmd
+document.addEventListener('wheel', function(e) {
+    if (e.ctrlKey || e.metaKey) {
+        e.preventDefault();
+    }
+}, { passive: false });
+
 // Initialize on load
 window.addEventListener('DOMContentLoaded', () => {
     loadData();

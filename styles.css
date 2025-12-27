@@ -22,6 +22,15 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
+    /* Verhindere Zoom komplett */
+    touch-action: manipulation;
+    -ms-touch-action: manipulation;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    /* Verhindere Double-Tap-Zoom */
+    -webkit-tap-highlight-color: transparent;
 }
 
 .liquid-bg {
@@ -322,20 +331,34 @@ body {
 
 /* MOBILE FIXES */
 @media (max-width: 768px) {
+    body {
+        height: 100vh;
+        height: 100dvh; /* Dynamic viewport height für Mobile */
+        overflow: hidden;
+        position: fixed;
+        width: 100%;
+    }
+    
     .app-container { 
         flex-direction: column; 
-        padding: 10px; 
-        gap: 10px;
+        padding: 8px; 
+        gap: 8px;
         max-height: 100vh;
+        max-height: 100dvh;
         overflow: hidden;
+        height: 100%;
+        justify-content: space-between;
     }
     
     .player-card { 
         flex-direction: row; 
-        padding: 15px; 
-        gap: 15px; 
+        padding: 12px; 
+        gap: 12px; 
         min-height: 0;
-        flex: 1 1 auto;
+        flex: 1 1 0;
+        max-height: calc(50vh - 30px);
+        max-height: calc(50dvh - 30px);
+        overflow: hidden;
     }
     
     .counter-wrapper { 
@@ -345,52 +368,61 @@ body {
         flex-direction: column;
         align-items: center;
         justify-content: center;
+        flex-shrink: 0;
     }
     
-    .current-wins-display { font-size: 4.5rem; }
-    .controls { gap: 10px; }
-    .btn { width: 50px; height: 50px; font-size: 1.5rem; }
+    .current-wins-display { font-size: 4rem; }
+    .controls { gap: 8px; }
+    .btn { width: 45px; height: 45px; font-size: 1.4rem; }
     
     /* Ligen vertikal gestreift: Silber unten, Gold darüber, Platinum oben */
     .league-stack { 
         width: 55%; 
         margin-top: 0; 
         flex-direction: column; 
-        gap: 8px;
-        justify-content: center;
+        gap: 6px;
+        justify-content: flex-start;
         align-items: center;
         overflow-y: auto;
+        overflow-x: hidden;
         max-height: 100%;
+        flex: 1 1 auto;
+        min-height: 0;
     }
     
     .league-item { 
-        padding: 10px 15px; 
+        padding: 8px 12px; 
         flex-direction: row; 
         width: 100%;
         min-width: auto;
         text-align: left;
         justify-content: space-between;
         align-items: center;
+        flex-shrink: 0;
     }
     
     /* Zeige Namen der Ligen auf Mobile */
     .league-left { 
         display: flex; 
         flex-direction: row; 
-        gap: 10px;
+        gap: 8px;
         align-items: center;
     }
     
     .league-name { 
         display: block;
-        font-size: 0.9rem;
+        font-size: 0.85rem;
+    }
+    
+    .league-count {
+        font-size: 1rem;
     }
     
     .player-header { 
         position: absolute; 
-        top: 8px; 
-        left: 15px; 
-        font-size: 0.65rem; 
+        top: 6px; 
+        left: 12px; 
+        font-size: 0.6rem; 
     }
     
     /* Buttons in der Mitte zwischen den Spielern */
@@ -400,7 +432,25 @@ body {
         align-items: center;
         width: 100%;
         margin: 0;
-        padding: 8px 0;
+        padding: 6px 0;
         flex-shrink: 0;
+        min-height: 40px;
+    }
+    
+    .top-btn {
+        padding: 10px 20px;
+        font-size: 0.85rem;
+    }
+    
+    /* Verhindere Zoom komplett auf Mobile */
+    * {
+        touch-action: manipulation;
+        -ms-touch-action: manipulation;
+    }
+    
+    /* Verhindere Double-Tap-Zoom */
+    html {
+        touch-action: manipulation;
+        -ms-touch-action: manipulation;
     }
 }
