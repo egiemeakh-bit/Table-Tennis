@@ -47,14 +47,11 @@ function checkComeback(pIdx) {
 function addWin(pIdx, leagueIdx) {
     if (leagueIdx >= leagueConfig.length) return;
     
-    const wasPromoted = players[pIdx].scores[leagueIdx] === 2 && leagueIdx < 3; // Bronze, Silber, Gold haben Promotion bei 3
-    const wasGoldPromotion = leagueIdx === 2 && players[pIdx].scores[leagueIdx] === 2; // Gold zu Platinum
+    // Prüfe auf Comeback VOR dem Score-Update
+    const isComeback = checkComeback(pIdx);
     
     players[pIdx].scores[leagueIdx]++;
 
-    // Prüfe auf Comeback
-    const isComeback = checkComeback(pIdx);
-    
     // Gold ist auf 3 limitiert
     if (leagueConfig[leagueIdx].name === "Gold") {
         if (players[pIdx].scores[leagueIdx] >= 3) {
