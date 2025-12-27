@@ -321,17 +321,37 @@ function updateThemeIcon() {
 }
 
 // Sound Management
-function handleSoundUpload(type) {
+async function handleSoundUpload(type) {
     const input = document.getElementById(`${type}-sound-input`);
     const preview = document.getElementById(`${type}-sound-preview`);
     
     if (input.files && input.files[0]) {
         const file = input.files[0];
-        const url = URL.createObjectURL(file);
-        soundFiles[type] = url;
-        preview.src = url;
-        preview.style.display = 'block';
-        localStorage.setItem(`sound_${type}`, url);
+        
+        // Konvertiere File zu Base64 für persistente Speicherung
+        const reader = new FileReader();
+        reader.onload = async function(e) {
+            const base64 = e.target.result;
+            soundFiles[type] = base64;
+            preview.src = base64;
+            preview.style.display = 'block';
+            
+            // Speichere in Datenbank
+            if (currentGameId) {
+                try {
+                    const soundColumn = `sound_${type}`;
+                    const updateData = {};
+                    updateData[soundColumn] = base64;
+                    
+                    const { error } = await supabaseClient.from('games').update(updateData).eq('id', currentGameId);
+                    if (error) throw error;
+                } catch (err) {
+                    console.error("Fehler beim Speichern des Sounds:", err.message);
+                    alert('Fehler beim Speichern des Sounds!');
+                }
+            }
+        };
+        reader.readAsDataURL(file);
     }
 }
 
@@ -397,13 +417,16 @@ function playSound(type) {
 }
 
 function loadSounds() {
+    // Sounds werden jetzt aus der Datenbank geladen, nicht mehr aus localStorage
+    // Diese Funktion wird von loadGameData aufgerufen
+}
+
+function displaySounds() {
     ['win', 'promoted', 'comeback'].forEach(type => {
-        const saved = localStorage.getItem(`sound_${type}`);
-        if (saved) {
-            soundFiles[type] = saved;
+        if (soundFiles[type]) {
             const preview = document.getElementById(`${type}-sound-preview`);
             if (preview) {
-                preview.src = saved;
+                preview.src = soundFiles[type];
                 preview.style.display = 'block';
             }
         }
@@ -420,12 +443,10 @@ window.addEventListener('DOMContentLoaded', () => {
     }
     updateThemeIcon();
     
-    // Load sounds
-    loadSounds();
-    
     // Initialize previousTotalScores
     previousTotalScores[0] = getTotalScore(0);
     previousTotalScores[1] = getTotalScore(1);
     
+    // Load data (Sounds werden in loadGameData geladen)
     loadData();
 });

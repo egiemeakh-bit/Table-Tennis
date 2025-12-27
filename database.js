@@ -52,6 +52,13 @@ async function loadGameData(gameId) {
             while (players[1].scores.length < 4) players[1].scores.push(0);
             playerNames[0] = data.p1_name || "Spieler 1";
             playerNames[1] = data.p2_name || "Spieler 2";
+            
+            // Lade Sounds aus der Datenbank
+            if (data.sound_win) soundFiles.win = data.sound_win;
+            if (data.sound_promoted) soundFiles.promoted = data.sound_promoted;
+            if (data.sound_comeback) soundFiles.comeback = data.sound_comeback;
+            displaySounds();
+            
             // Aktualisiere previousTotalScores beim Laden
             previousTotalScores[0] = getTotalScore(0);
             previousTotalScores[1] = getTotalScore(1);
@@ -70,7 +77,10 @@ async function createDefaultGame() {
             p1_name: 'Spieler 1',
             p2_name: 'Spieler 2',
             p1_scores: [0, 0, 0, 0],
-            p2_scores: [0, 0, 0, 0]
+            p2_scores: [0, 0, 0, 0],
+            sound_win: null,
+            sound_promoted: null,
+            sound_comeback: null
         }).select().single();
         if (error) {
             if (error.message.includes('relation') && error.message.includes('does not exist')) {
@@ -94,7 +104,10 @@ async function saveData() {
             p1_scores: players[0].scores,
             p2_scores: players[1].scores,
             p1_name: playerNames[0],
-            p2_name: playerNames[1]
+            p2_name: playerNames[1],
+            sound_win: soundFiles.win || null,
+            sound_promoted: soundFiles.promoted || null,
+            sound_comeback: soundFiles.comeback || null
         }).eq('id', currentGameId);
         if (error) throw error;
     } catch (err) {
@@ -131,7 +144,10 @@ async function createNewGame() {
             p1_name: 'Spieler 1',
             p2_name: 'Spieler 2',
             p1_scores: [0, 0, 0, 0],
-            p2_scores: [0, 0, 0, 0]
+            p2_scores: [0, 0, 0, 0],
+            sound_win: null,
+            sound_promoted: null,
+            sound_comeback: null
         }).select().single();
         if (error) throw error;
         currentGameId = data.id;
@@ -209,6 +225,13 @@ supabaseClient.channel('db-changes').on('postgres_changes',
             players[1].scores = payload.new.p2_scores || [0, 0, 0, 0];
             playerNames[0] = payload.new.p1_name || "Spieler 1";
             playerNames[1] = payload.new.p2_name || "Spieler 2";
+            
+            // Lade Sounds aus der Datenbank
+            if (payload.new.sound_win) soundFiles.win = payload.new.sound_win;
+            if (payload.new.sound_promoted) soundFiles.promoted = payload.new.sound_promoted;
+            if (payload.new.sound_comeback) soundFiles.comeback = payload.new.sound_comeback;
+            displaySounds();
+            
             previousTotalScores[0] = getTotalScore(0);
             previousTotalScores[1] = getTotalScore(1);
             updateUI();

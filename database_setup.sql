@@ -9,8 +9,25 @@ CREATE TABLE IF NOT EXISTS games (
     p2_name TEXT NOT NULL DEFAULT 'Spieler 2',
     p1_scores JSONB NOT NULL DEFAULT '[0, 0, 0, 0]',
     p2_scores JSONB NOT NULL DEFAULT '[0, 0, 0, 0]',
+    sound_win TEXT,
+    sound_promoted TEXT,
+    sound_comeback TEXT,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
+
+-- Füge Sound-Spalten zu bestehenden Tabellen hinzu (falls Tabelle bereits existiert)
+DO $$ 
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='games' AND column_name='sound_win') THEN
+        ALTER TABLE games ADD COLUMN sound_win TEXT;
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='games' AND column_name='sound_promoted') THEN
+        ALTER TABLE games ADD COLUMN sound_promoted TEXT;
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='games' AND column_name='sound_comeback') THEN
+        ALTER TABLE games ADD COLUMN sound_comeback TEXT;
+    END IF;
+END $$;
 
 -- Erstelle Index für bessere Performance
 CREATE INDEX IF NOT EXISTS idx_games_created_at ON games(created_at DESC);
