@@ -329,6 +329,99 @@ body {
     background: rgba(255, 255, 255, 0.2);
 }
 
+/* Dynamic Island am unteren Rand */
+.dynamic-island {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    justify-content: center;
+    background: var(--glass-bg);
+    backdrop-filter: blur(30px);
+    -webkit-backdrop-filter: blur(30px);
+    border: 1px solid var(--glass-border);
+    border-radius: 50px;
+    padding: 12px 24px;
+    box-shadow: var(--glass-shadow);
+    z-index: 100;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.dynamic-island:hover {
+    transform: translateX(-50%) scale(1.05);
+    box-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.4);
+}
+
+.island-btn {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid var(--glass-border);
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    padding: 0;
+}
+
+.island-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: scale(1.1);
+}
+
+.island-btn:active {
+    transform: scale(0.95);
+}
+
+.island-btn svg {
+    width: 20px;
+    height: 20px;
+}
+
+/* Dark Mode Styles */
+body.light-mode {
+    background-color: #f5f5f7;
+}
+
+body.light-mode .liquid-bg {
+    background: linear-gradient(135deg, #e8e8f0, #d0d0e0, #f0f0f8);
+}
+
+body.light-mode .player-card {
+    background: rgba(255, 255, 255, 0.3);
+    border-color: rgba(0, 0, 0, 0.1);
+}
+
+body.light-mode .popup-content {
+    background: rgba(255, 255, 255, 0.3);
+    border-color: rgba(0, 0, 0, 0.1);
+}
+
+body.light-mode .dynamic-island {
+    background: rgba(255, 255, 255, 0.3);
+    border-color: rgba(0, 0, 0, 0.1);
+}
+
+body.light-mode .island-btn {
+    background: rgba(0, 0, 0, 0.05);
+    border-color: rgba(0, 0, 0, 0.1);
+}
+
+body.light-mode .island-btn:hover {
+    background: rgba(0, 0, 0, 0.1);
+}
+
+body.light-mode {
+    --text-primary: #1d1d1f;
+    --text-secondary: rgba(0, 0, 0, 0.6);
+}
+
 /* MOBILE FIXES */
 @media (max-width: 768px) {
     body {
@@ -431,16 +524,9 @@ body {
         z-index: 1;
     }
     
-    /* Buttons in der Mitte zwischen den Spielern */
+    /* Buttons in der Mitte zwischen den Spielern - auf Mobile versteckt, da Dynamic Island verwendet wird */
     .top-buttons { 
-        display: flex; 
-        justify-content: center;
-        align-items: center;
-        width: 100%;
-        margin: 0;
-        padding: 6px 0;
-        flex-shrink: 0;
-        min-height: 40px;
+        display: none;
     }
     
     .top-btn {
@@ -458,5 +544,22 @@ body {
     html {
         touch-action: manipulation;
         -ms-touch-action: manipulation;
+    }
+    
+    /* Dynamic Island auf Mobile */
+    .dynamic-island {
+        bottom: 15px;
+        padding: 10px 20px;
+        gap: 10px;
+    }
+    
+    .island-btn {
+        width: 40px;
+        height: 40px;
+    }
+    
+    .island-btn svg {
+        width: 18px;
+        height: 18px;
     }
 }

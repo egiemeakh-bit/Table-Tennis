@@ -10,6 +10,13 @@ const leagueConfig = [
 let players = [{ scores: [0, 0, 0, 0] }, { scores: [0, 0, 0, 0] }];
 let currentGameId = null;
 let playerNames = ["Spieler 1", "Spieler 2"];
+let isDarkMode = true;
+let soundFiles = {
+    win: null,
+    promoted: null,
+    comeback: null
+};
+let previousTotalScores = [0, 0]; // Für Comeback-Erkennung
 
 // Score Management
 function modifyScore(playerIndex, change) {
@@ -19,10 +26,35 @@ function modifyScore(playerIndex, change) {
     saveData();
 }
 
+function getTotalScore(pIdx) {
+    return players[pIdx].scores.reduce((a, b) => a + b, 0);
+}
+
+function checkComeback(pIdx) {
+    const otherIdx = pIdx === 0 ? 1 : 0;
+    const currentTotal = getTotalScore(pIdx);
+    const otherTotal = getTotalScore(otherIdx);
+    const prevTotal = previousTotalScores[pIdx];
+    const prevOtherTotal = previousTotalScores[otherIdx];
+    
+    // Prüfe ob Gegner 10+ Vorsprung hatte und man jetzt aufholt
+    if (prevOtherTotal - prevTotal >= 10 && currentTotal >= otherTotal) {
+        return true;
+    }
+    return false;
+}
+
 function addWin(pIdx, leagueIdx) {
     if (leagueIdx >= leagueConfig.length) return;
+    
+    const wasPromoted = players[pIdx].scores[leagueIdx] === 2 && leagueIdx < 3; // Bronze, Silber, Gold haben Promotion bei 3
+    const wasGoldPromotion = leagueIdx === 2 && players[pIdx].scores[leagueIdx] === 2; // Gold zu Platinum
+    
     players[pIdx].scores[leagueIdx]++;
 
+    // Prüfe auf Comeback
+    const isComeback = checkComeback(pIdx);
+    
     // Gold ist auf 3 limitiert
     if (leagueConfig[leagueIdx].name === "Gold") {
         if (players[pIdx].scores[leagueIdx] >= 3) {
@@ -33,14 +65,32 @@ function addWin(pIdx, leagueIdx) {
             // Setze Gold zurück auf 0
             players[0].scores[leagueIdx] = 0;
             players[1].scores[leagueIdx] = 0;
+            
+            // Aktualisiere previousTotalScores vor Promotion
+            previousTotalScores[0] = getTotalScore(0);
+            previousTotalScores[1] = getTotalScore(1);
+            
             // Platinum ist unbegrenzt, also einfach weiter erhöhen
             addWin(pIdx, leagueIdx + 1);
+            
+            // Promoted Sound abspielen
+            playSound('promoted');
+            return;
         }
-        return;
     }
 
     // Platinum ist unbegrenzt
     if (leagueConfig[leagueIdx].name === "Platin") {
+        // Aktualisiere previousTotalScores
+        previousTotalScores[0] = getTotalScore(0);
+        previousTotalScores[1] = getTotalScore(1);
+        
+        // Prüfe auf Comeback
+        if (isComeback) {
+            playSound('comeback');
+        } else {
+            playSound('win');
+        }
         return; // Keine Limitierung, einfach weiter erhöhen
     }
 
@@ -48,12 +98,36 @@ function addWin(pIdx, leagueIdx) {
     if (players[pIdx].scores[leagueIdx] >= 3) {
         players[0].scores[leagueIdx] = 0;
         players[1].scores[leagueIdx] = 0;
+        
+        // Aktualisiere previousTotalScores vor Promotion
+        previousTotalScores[0] = getTotalScore(0);
+        previousTotalScores[1] = getTotalScore(1);
+        
         addWin(pIdx, leagueIdx + 1);
+        
+        // Promoted Sound abspielen
+        playSound('promoted');
+        return;
+    }
+    
+    // Aktualisiere previousTotalScores
+    previousTotalScores[0] = getTotalScore(0);
+    previousTotalScores[1] = getTotalScore(1);
+    
+    // Normales Win (kein Promotion)
+    if (isComeback) {
+        playSound('comeback');
+    } else {
+        playSound('win');
     }
 }
 
 function removeWin(pIdx) {
-    if (players[pIdx].scores[0] > 0) players[pIdx].scores[0]--;
+    if (players[pIdx].scores[0] > 0) {
+        players[pIdx].scores[0]--;
+        previousTotalScores[0] = getTotalScore(0);
+        previousTotalScores[1] = getTotalScore(1);
+    }
 }
 
 // UI Updates
@@ -216,7 +290,100 @@ document.addEventListener('wheel', function(e) {
     }
 }, { passive: false });
 
+// Theme Toggle
+function toggleTheme() {
+    isDarkMode = !isDarkMode;
+    document.body.classList.toggle('light-mode', !isDarkMode);
+    localStorage.setItem('theme', isDarkMode ? 'dark' : 'light');
+    updateThemeIcon();
+}
+
+function updateThemeIcon() {
+    const icon = document.getElementById('theme-icon');
+    if (!icon) return;
+    
+    if (isDarkMode) {
+        // Sonne (Light Mode Icon)
+        icon.innerHTML = `
+            <circle cx="12" cy="12" r="5"></circle>
+            <line x1="12" y1="1" x2="12" y2="3"></line>
+            <line x1="12" y1="21" x2="12" y2="23"></line>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+            <line x1="1" y1="12" x2="3" y2="12"></line>
+            <line x1="21" y1="12" x2="23" y2="12"></line>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+        `;
+    } else {
+        // Mond (Dark Mode Icon)
+        icon.innerHTML = `
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+        `;
+    }
+}
+
+// Sound Management
+function handleSoundUpload(type) {
+    const input = document.getElementById(`${type}-sound-input`);
+    const preview = document.getElementById(`${type}-sound-preview`);
+    
+    if (input.files && input.files[0]) {
+        const file = input.files[0];
+        const url = URL.createObjectURL(file);
+        soundFiles[type] = url;
+        preview.src = url;
+        preview.style.display = 'block';
+        localStorage.setItem(`sound_${type}`, url);
+    }
+}
+
+function testSound(type) {
+    if (soundFiles[type]) {
+        const audio = new Audio(soundFiles[type]);
+        audio.play().catch(e => console.error('Sound konnte nicht abgespielt werden:', e));
+    } else {
+        alert('Bitte lade zuerst eine Sound-Datei hoch!');
+    }
+}
+
+function playSound(type) {
+    if (soundFiles[type]) {
+        const audio = new Audio(soundFiles[type]);
+        audio.play().catch(e => console.error('Sound konnte nicht abgespielt werden:', e));
+    }
+}
+
+function loadSounds() {
+    ['win', 'promoted', 'comeback'].forEach(type => {
+        const saved = localStorage.getItem(`sound_${type}`);
+        if (saved) {
+            soundFiles[type] = saved;
+            const preview = document.getElementById(`${type}-sound-preview`);
+            if (preview) {
+                preview.src = saved;
+                preview.style.display = 'block';
+            }
+        }
+    });
+}
+
 // Initialize on load
 window.addEventListener('DOMContentLoaded', () => {
+    // Load theme
+    const savedTheme = localStorage.getItem('theme');
+    isDarkMode = savedTheme !== 'light';
+    if (!isDarkMode) {
+        document.body.classList.add('light-mode');
+    }
+    updateThemeIcon();
+    
+    // Load sounds
+    loadSounds();
+    
+    // Initialize previousTotalScores
+    previousTotalScores[0] = getTotalScore(0);
+    previousTotalScores[1] = getTotalScore(1);
+    
     loadData();
 });

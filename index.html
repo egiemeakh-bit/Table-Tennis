@@ -33,6 +33,35 @@
             <button class="top-btn" onclick="openSettings()">Settings</button>
         </div>
 
+        <!-- Dynamic Island am unteren Rand -->
+        <div class="dynamic-island">
+            <button class="island-btn" onclick="openSettings()" title="Settings">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="3"></circle>
+                    <path d="M12 1v6m0 6v6m9-9h-6m-6 0H3"></path>
+                </svg>
+            </button>
+            <button class="island-btn" onclick="openAchievements()" title="Achievements">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 2L2 7l10 5 10-5-10-5z"></path>
+                    <path d="M2 17l10 5 10-5M2 12l10 5 10-5"></path>
+                </svg>
+            </button>
+            <button class="island-btn" onclick="toggleTheme()" title="Theme wechseln" id="theme-toggle">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" id="theme-icon">
+                    <circle cx="12" cy="12" r="5"></circle>
+                    <line x1="12" y1="1" x2="12" y2="3"></line>
+                    <line x1="12" y1="21" x2="12" y2="23"></line>
+                    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                    <line x1="1" y1="12" x2="3" y2="12"></line>
+                    <line x1="21" y1="12" x2="23" y2="12"></line>
+                    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                </svg>
+            </button>
+        </div>
+
         <div class="player-card" id="p2-card">
             <div class="player-header" id="p2-header">Spieler 2</div>
             <div class="counter-wrapper">
@@ -84,6 +113,30 @@
                     <div class="confirmation-buttons">
                         <button class="popup-btn success" onclick="confirmReset()">✓</button>
                         <button class="popup-btn danger" onclick="cancelReset()">✗</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="popup-section">
+                <div class="popup-section-title">Sound-Einstellungen</div>
+                <div style="margin-bottom: 15px;">
+                    <div style="margin-bottom: 10px;">
+                        <label style="display: block; margin-bottom: 5px; font-size: 0.9rem;">Win Sound</label>
+                        <input type="file" accept="audio/*" class="popup-input" id="win-sound-input" onchange="handleSoundUpload('win')" style="padding: 8px;">
+                        <audio id="win-sound-preview" controls style="width: 100%; margin-top: 5px; display: none;"></audio>
+                        <button class="popup-btn" onclick="testSound('win')" style="margin-top: 5px; width: auto; padding: 6px 12px;">Test</button>
+                    </div>
+                    <div style="margin-bottom: 10px;">
+                        <label style="display: block; margin-bottom: 5px; font-size: 0.9rem;">Promoted Sound (Ligenaufstieg)</label>
+                        <input type="file" accept="audio/*" class="popup-input" id="promoted-sound-input" onchange="handleSoundUpload('promoted')" style="padding: 8px;">
+                        <audio id="promoted-sound-preview" controls style="width: 100%; margin-top: 5px; display: none;"></audio>
+                        <button class="popup-btn" onclick="testSound('promoted')" style="margin-top: 5px; width: auto; padding: 6px 12px;">Test</button>
+                    </div>
+                    <div style="margin-bottom: 10px;">
+                        <label style="display: block; margin-bottom: 5px; font-size: 0.9rem;">Comeback Sound</label>
+                        <input type="file" accept="audio/*" class="popup-input" id="comeback-sound-input" onchange="handleSoundUpload('comeback')" style="padding: 8px;">
+                        <audio id="comeback-sound-preview" controls style="width: 100%; margin-top: 5px; display: none;"></audio>
+                        <button class="popup-btn" onclick="testSound('comeback')" style="margin-top: 5px; width: auto; padding: 6px 12px;">Test</button>
                     </div>
                 </div>
             </div>

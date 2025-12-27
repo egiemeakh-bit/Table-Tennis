@@ -52,6 +52,9 @@ async function loadGameData(gameId) {
             while (players[1].scores.length < 4) players[1].scores.push(0);
             playerNames[0] = data.p1_name || "Spieler 1";
             playerNames[1] = data.p2_name || "Spieler 2";
+            // Aktualisiere previousTotalScores beim Laden
+            previousTotalScores[0] = getTotalScore(0);
+            previousTotalScores[1] = getTotalScore(1);
             updateUI();
             updatePlayerNames();
         }
@@ -154,6 +157,8 @@ async function confirmReset() {
         if (error) throw error;
         players[0].scores = [0, 0, 0, 0];
         players[1].scores = [0, 0, 0, 0];
+        previousTotalScores[0] = 0;
+        previousTotalScores[1] = 0;
         updateUI();
         document.getElementById('reset-confirmation').style.display = 'none';
     } catch (err) {
@@ -204,6 +209,8 @@ supabaseClient.channel('db-changes').on('postgres_changes',
             players[1].scores = payload.new.p2_scores || [0, 0, 0, 0];
             playerNames[0] = payload.new.p1_name || "Spieler 1";
             playerNames[1] = payload.new.p2_name || "Spieler 2";
+            previousTotalScores[0] = getTotalScore(0);
+            previousTotalScores[1] = getTotalScore(1);
             updateUI();
             updatePlayerNames();
         }
