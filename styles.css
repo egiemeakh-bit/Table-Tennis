@@ -77,7 +77,6 @@ body {
     align-items: center;
     padding: 30px 20px;
     position: relative;
-    max-height: 85vh; /* Reduziere Höhe für mehr Platz in der Mitte */
 }
 
 .player-header {
@@ -85,15 +84,8 @@ body {
     letter-spacing: 2px;
     font-size: 0.9rem;
     color: var(--text-secondary);
+    margin-bottom: 20px;
     font-weight: 600;
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    margin-top: -120px; /* Position über dem Counter */
-    z-index: 1;
-    text-align: center;
-    width: 100%;
 }
 
 .counter-wrapper {
@@ -102,7 +94,6 @@ body {
     align-items: center;
     margin-bottom: auto; 
     margin-top: 40px;
-    position: relative;
 }
 
 .current-wins-display {
@@ -364,9 +355,8 @@ body {
         padding: 12px; 
         gap: 12px; 
         min-height: 0;
-        flex: 1 1 0;
-        max-height: calc(42vh - 30px);
-        max-height: calc(42dvh - 30px);
+        flex: 0 0 calc(45dvh - 20px);
+        max-height: calc(45dvh - 20px);
         overflow: hidden;
     }
     
@@ -431,12 +421,11 @@ body {
     .player-header { 
         position: absolute; 
         top: 50%;
-        left: 50%;
+        left: 22.5%;
         transform: translate(-50%, -50%);
-        margin-top: -70px; /* Position über dem Counter auf Mobile */
-        font-size: 0.6rem;
-        text-align: center;
-        width: 100%;
+        margin-top: -2.5rem;
+        font-size: 0.65rem;
+        white-space: nowrap;
         z-index: 1;
     }
     
