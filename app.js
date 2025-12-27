@@ -338,16 +338,61 @@ function handleSoundUpload(type) {
 function testSound(type) {
     if (soundFiles[type]) {
         const audio = new Audio(soundFiles[type]);
+        audio.volume = 1.0;
         audio.play().catch(e => console.error('Sound konnte nicht abgespielt werden:', e));
+        
+        // Nach 5 Sekunden langsam ausfaden
+        setTimeout(() => {
+            const fadeOutInterval = setInterval(() => {
+                if (audio.volume > 0.05) {
+                    audio.volume -= 0.05;
+                } else {
+                    audio.pause();
+                    audio.currentTime = 0;
+                    audio.volume = 1.0;
+                    clearInterval(fadeOutInterval);
+                }
+            }, 50);
+        }, 5000);
     } else {
         alert('Bitte lade zuerst eine Sound-Datei hoch!');
     }
 }
 
+let activeAudioInstances = [];
+
 function playSound(type) {
     if (soundFiles[type]) {
         const audio = new Audio(soundFiles[type]);
+        audio.volume = 1.0;
+        
+        // Stoppe alle laufenden Sounds
+        activeAudioInstances.forEach(a => {
+            a.pause();
+            a.currentTime = 0;
+        });
+        activeAudioInstances = [];
+        
         audio.play().catch(e => console.error('Sound konnte nicht abgespielt werden:', e));
+        activeAudioInstances.push(audio);
+        
+        // Nach 5 Sekunden langsam ausfaden
+        setTimeout(() => {
+            const fadeOutInterval = setInterval(() => {
+                if (audio.volume > 0.05) {
+                    audio.volume -= 0.05;
+                } else {
+                    audio.pause();
+                    audio.currentTime = 0;
+                    audio.volume = 1.0;
+                    clearInterval(fadeOutInterval);
+                    const index = activeAudioInstances.indexOf(audio);
+                    if (index > -1) {
+                        activeAudioInstances.splice(index, 1);
+                    }
+                }
+            }, 50); // Alle 50ms um 0.05 reduzieren (ca. 1 Sekunde Fade-Out)
+        }, 5000);
     }
 }
 

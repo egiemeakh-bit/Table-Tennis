@@ -384,42 +384,105 @@ body {
     height: 20px;
 }
 
-/* Dark Mode Styles */
+/* Light Mode Styles - Apple Liquid Glass Design */
 body.light-mode {
     background-color: #f5f5f7;
+    --text-primary: #1d1d1f;
+    --text-secondary: rgba(0, 0, 0, 0.6);
 }
 
 body.light-mode .liquid-bg {
-    background: linear-gradient(135deg, #e8e8f0, #d0d0e0, #f0f0f8);
+    background: linear-gradient(135deg, #f0f0f5, #e8e8f0, #f5f5f8);
 }
 
+body.light-mode .blob-1 { background: #a8d5ff; }
+body.light-mode .blob-2 { background: #ffb3e6; }
+body.light-mode .blob-3 { background: #b3ffd9; opacity: 0.3; }
+
 body.light-mode .player-card {
-    background: rgba(255, 255, 255, 0.3);
-    border-color: rgba(0, 0, 0, 0.1);
+    background: rgba(255, 255, 255, 0.4);
+    backdrop-filter: blur(30px);
+    -webkit-backdrop-filter: blur(30px);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.6);
 }
 
 body.light-mode .popup-content {
-    background: rgba(255, 255, 255, 0.3);
-    border-color: rgba(0, 0, 0, 0.1);
+    background: rgba(255, 255, 255, 0.4);
+    backdrop-filter: blur(30px);
+    -webkit-backdrop-filter: blur(30px);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.6);
 }
 
 body.light-mode .dynamic-island {
-    background: rgba(255, 255, 255, 0.3);
-    border-color: rgba(0, 0, 0, 0.1);
+    background: rgba(255, 255, 255, 0.4);
+    backdrop-filter: blur(40px);
+    -webkit-backdrop-filter: blur(40px);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.6);
 }
 
 body.light-mode .island-btn {
-    background: rgba(0, 0, 0, 0.05);
-    border-color: rgba(0, 0, 0, 0.1);
+    background: rgba(255, 255, 255, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5);
 }
 
 body.light-mode .island-btn:hover {
-    background: rgba(0, 0, 0, 0.1);
+    background: rgba(255, 255, 255, 0.5);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7);
 }
 
-body.light-mode {
-    --text-primary: #1d1d1f;
-    --text-secondary: rgba(0, 0, 0, 0.6);
+body.light-mode .popup-input,
+body.light-mode .popup-select {
+    background: rgba(255, 255, 255, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    color: var(--text-primary);
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+body.light-mode .popup-input:focus,
+body.light-mode .popup-select:focus {
+    background: rgba(255, 255, 255, 0.5);
+    border-color: rgba(255, 255, 255, 0.6);
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.05), 0 0 0 3px rgba(0, 122, 255, 0.1);
+}
+
+body.light-mode .popup-btn {
+    background: rgba(255, 255, 255, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5);
+}
+
+body.light-mode .popup-btn:hover {
+    background: rgba(255, 255, 255, 0.5);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7);
+}
+
+body.light-mode .league-item {
+    background: rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+body.light-mode .league-item.active {
+    background: rgba(255, 255, 255, 0.4);
+    border-color: rgba(255, 255, 255, 0.5);
+}
+
+body.light-mode .btn {
+    background: rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4);
+}
+
+body.light-mode .btn:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+body.light-mode .btn-plus {
+    background: rgba(255, 255, 255, 0.3);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.5);
 }
 
 /* MOBILE FIXES */
@@ -435,12 +498,12 @@ body.light-mode {
     .app-container { 
         flex-direction: column; 
         padding: 8px; 
-        gap: 8px;
+        gap: 0;
         max-height: 100vh;
         max-height: 100dvh;
         overflow: hidden;
         height: 100%;
-        justify-content: space-between;
+        justify-content: flex-start;
     }
     
     .player-card { 
@@ -448,9 +511,14 @@ body.light-mode {
         padding: 12px; 
         gap: 12px; 
         min-height: 0;
-        flex: 0 0 calc(45dvh - 20px);
-        max-height: calc(45dvh - 20px);
+        flex: 0 0 calc(50dvh - 60px);
+        max-height: calc(50dvh - 60px);
         overflow: hidden;
+        margin-bottom: 0;
+    }
+    
+    #p2-card {
+        margin-top: 0;
     }
     
     .counter-wrapper { 
@@ -548,18 +616,28 @@ body.light-mode {
     
     /* Dynamic Island auf Mobile */
     .dynamic-island {
-        bottom: 15px;
-        padding: 10px 20px;
+        bottom: 12px;
+        padding: 10px 18px;
         gap: 10px;
+        border-radius: 40px;
     }
     
     .island-btn {
-        width: 40px;
-        height: 40px;
+        width: 38px;
+        height: 38px;
     }
     
     .island-btn svg {
         width: 18px;
         height: 18px;
+    }
+    
+    /* Light Mode Mobile Optimierungen */
+    body.light-mode .player-card {
+        box-shadow: 0 4px 20px 0 rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.6);
+    }
+    
+    body.light-mode .dynamic-island {
+        box-shadow: 0 4px 20px 0 rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.6);
     }
 }
