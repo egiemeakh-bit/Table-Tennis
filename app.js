@@ -47,11 +47,11 @@ function checkComeback(pIdx) {
 function addWin(pIdx, leagueIdx) {
     if (leagueIdx >= leagueConfig.length) return;
     
-    // Prüfe auf Comeback VOR dem Score-Update
+    players[pIdx].scores[leagueIdx]++;
+    
+    // Prüfe auf Comeback NACH dem Score-Update
     const isComeback = checkComeback(pIdx);
     
-    players[pIdx].scores[leagueIdx]++;
-
     // Gold ist auf 3 limitiert
     if (leagueConfig[leagueIdx].name === "Gold") {
         if (players[pIdx].scores[leagueIdx] >= 3) {
