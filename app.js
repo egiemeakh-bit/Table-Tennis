@@ -63,8 +63,24 @@ function updateUI() {
         document.getElementById(pIdx === 0 ? 'p1-display' : 'p2-display').innerText = p.scores[0];
         const container = document.getElementById(pIdx === 0 ? 'p1-leagues' : 'p2-leagues');
         container.innerHTML = '';
+        
+        // Auf Mobile: Silber unten, Gold darüber, Platinum oben
+        // Reihenfolge: Silber (idx 1), Gold (idx 2), Platinum (idx 3)
+        // Auf Mobile sollen sie in umgekehrter Reihenfolge angezeigt werden: Platinum, Gold, Silber
+        const isMobile = window.innerWidth <= 768;
+        const leaguesToShow = [];
+        
         leagueConfig.forEach((league, idx) => {
-            if (idx === 0) return;
+            if (idx === 0) return; // Bronze überspringen
+            leaguesToShow.push({ league, idx });
+        });
+        
+        // Auf Mobile umkehren für vertikale Anzeige: Platinum oben, Gold Mitte, Silber unten
+        if (isMobile) {
+            leaguesToShow.reverse();
+        }
+        
+        leaguesToShow.forEach(({ league, idx }) => {
             const item = document.createElement('div');
             item.className = `league-item ${league.class} ${p.scores[idx] > 0 ? 'active' : ''}`;
             item.innerHTML = `<div class="league-left"><div class="league-icon"></div><div class="league-name">${league.name}</div></div><div class="league-count">${p.scores[idx]}</div>`;
@@ -72,6 +88,11 @@ function updateUI() {
         });
     });
 }
+
+// Update UI when window is resized to handle mobile/desktop switch
+window.addEventListener('resize', () => {
+    updateUI();
+});
 
 function updatePlayerNames() {
     document.getElementById('p1-header').textContent = playerNames[0];
@@ -144,4 +165,3 @@ document.addEventListener('click', (e) => {
 window.addEventListener('DOMContentLoaded', () => {
     loadData();
 });
-

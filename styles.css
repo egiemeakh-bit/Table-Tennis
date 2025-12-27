@@ -293,8 +293,8 @@ body {
 .top-buttons {
     display: none;
     justify-content: center;
+    align-items: center;
     gap: 15px;
-    margin-bottom: 10px;
     position: relative;
     z-index: 10;
 }
@@ -322,20 +322,85 @@ body {
 
 /* MOBILE FIXES */
 @media (max-width: 768px) {
-    .app-container { flex-direction: column; padding: 10px; }
-    .player-card { flex-direction: row; padding: 15px; gap: 15px; }
-    .counter-wrapper { margin: 0; width: 45%; }
+    .app-container { 
+        flex-direction: column; 
+        padding: 10px; 
+        gap: 10px;
+        max-height: 100vh;
+        overflow: hidden;
+    }
+    
+    .player-card { 
+        flex-direction: row; 
+        padding: 15px; 
+        gap: 15px; 
+        min-height: 0;
+        flex: 1 1 auto;
+    }
+    
+    .counter-wrapper { 
+        margin: 0; 
+        width: 45%; 
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+    }
+    
     .current-wins-display { font-size: 4.5rem; }
     .controls { gap: 10px; }
     .btn { width: 50px; height: 50px; font-size: 1.5rem; }
-    .league-stack { width: 55%; margin-top: 0; flex-direction: row-reverse; flex-wrap: wrap; justify-content: flex-end; gap: 5px; }
-    .league-item { padding: 8px 10px; flex-direction: column; min-width: 50px; text-align: center; }
     
-    /* Zeige Icon auf Mobile, aber verstecke Text für Platz */
-    .league-left { display: flex; flex-direction: column; gap: 4px; }
-    .league-name { display: none; } 
-    .player-header { position: absolute; top: 8px; left: 15px; font-size: 0.65rem; }
+    /* Ligen vertikal gestreift: Silber unten, Gold darüber, Platinum oben */
+    .league-stack { 
+        width: 55%; 
+        margin-top: 0; 
+        flex-direction: column; 
+        gap: 8px;
+        justify-content: center;
+        align-items: center;
+        overflow-y: auto;
+        max-height: 100%;
+    }
     
-    .top-buttons { display: flex; }
+    .league-item { 
+        padding: 10px 15px; 
+        flex-direction: row; 
+        width: 100%;
+        min-width: auto;
+        text-align: left;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    /* Zeige Namen der Ligen auf Mobile */
+    .league-left { 
+        display: flex; 
+        flex-direction: row; 
+        gap: 10px;
+        align-items: center;
+    }
+    
+    .league-name { 
+        display: block;
+        font-size: 0.9rem;
+    }
+    
+    .player-header { 
+        position: absolute; 
+        top: 8px; 
+        left: 15px; 
+        font-size: 0.65rem; 
+    }
+    
+    /* Buttons in der Mitte zwischen den Spielern */
+    .top-buttons { 
+        display: flex; 
+        justify-content: center;
+        align-items: center;
+        width: 100%;
+        margin: 0;
+        padding: 8px 0;
+        flex-shrink: 0;
+    }
 }
-
