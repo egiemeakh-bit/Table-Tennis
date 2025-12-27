@@ -13,36 +13,15 @@
 
 * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-tap-highlight-color: transparent; }
 
-html {
-    height: 100%;
-    width: 100%;
-    overflow: hidden;
-    position: fixed;
-    touch-action: manipulation;
-    -ms-touch-action: manipulation;
-    -webkit-text-size-adjust: 100%;
-    -moz-text-size-adjust: 100%;
-    -ms-text-size-adjust: 100%;
-    text-size-adjust: 100%;
-}
-
 body {
     font-family: var(--font-stack);
     background-color: #000;
     color: var(--text-primary);
     height: 100vh;
-    width: 100vw;
     overflow: hidden;
     display: flex;
     justify-content: center;
     align-items: center;
-    margin: 0;
-    padding: 0;
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
     /* Verhindere Zoom komplett */
     touch-action: manipulation;
     -ms-touch-action: manipulation;
@@ -52,15 +31,11 @@ body {
     user-select: none;
     /* Verhindere Double-Tap-Zoom */
     -webkit-tap-highlight-color: transparent;
-    -webkit-text-size-adjust: 100%;
-    -moz-text-size-adjust: 100%;
-    -ms-text-size-adjust: 100%;
-    text-size-adjust: 100%;
 }
 
 .liquid-bg {
-    position: fixed;
-    top: 0; left: 0; width: 100vw; height: 100vh;
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
     z-index: -1;
     background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
     overflow: hidden;
@@ -87,8 +62,6 @@ body {
     max-width: 1200px;
     padding: 20px;
     gap: 20px;
-    box-sizing: border-box;
-    overflow: hidden;
 }
 
 .player-card {
@@ -358,52 +331,34 @@ body {
 
 /* MOBILE FIXES */
 @media (max-width: 768px) {
-    html, body {
+    body {
         height: 100vh;
-        height: 100dvh;
-        width: 100vw;
+        height: 100dvh; /* Dynamic viewport height für Mobile */
         overflow: hidden;
         position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        margin: 0;
-        padding: 0;
-        -webkit-overflow-scrolling: touch;
-    }
-    
-    .liquid-bg {
-        height: 100vh;
-        height: 100dvh;
-        width: 100vw;
+        width: 100%;
     }
     
     .app-container { 
         flex-direction: column; 
-        padding: 6px; 
-        gap: 6px;
-        height: 100vh;
-        height: 100dvh;
+        padding: 8px; 
+        gap: 8px;
         max-height: 100vh;
         max-height: 100dvh;
         overflow: hidden;
-        box-sizing: border-box;
-        justify-content: flex-start;
-        align-items: stretch;
+        height: 100%;
+        justify-content: space-between;
     }
     
     .player-card { 
         flex-direction: row; 
-        padding: 10px; 
-        gap: 10px; 
+        padding: 12px; 
+        gap: 12px; 
         min-height: 0;
-        flex: 0 0 calc((100vh - 60px) / 2);
-        flex: 0 0 calc((100dvh - 60px) / 2);
-        max-height: calc((100vh - 60px) / 2);
-        max-height: calc((100dvh - 60px) / 2);
+        flex: 1 1 0;
+        max-height: calc(50vh - 30px);
+        max-height: calc(50dvh - 30px);
         overflow: hidden;
-        box-sizing: border-box;
     }
     
     .counter-wrapper { 
@@ -414,19 +369,18 @@ body {
         align-items: center;
         justify-content: center;
         flex-shrink: 0;
-        min-width: 0;
     }
     
-    .current-wins-display { font-size: 3.5rem; }
+    .current-wins-display { font-size: 4rem; }
     .controls { gap: 8px; }
-    .btn { width: 40px; height: 40px; font-size: 1.3rem; }
+    .btn { width: 45px; height: 45px; font-size: 1.4rem; }
     
     /* Ligen vertikal gestreift: Silber unten, Gold darüber, Platinum oben */
     .league-stack { 
         width: 55%; 
         margin-top: 0; 
         flex-direction: column; 
-        gap: 5px;
+        gap: 6px;
         justify-content: flex-start;
         align-items: center;
         overflow-y: auto;
@@ -434,14 +388,13 @@ body {
         max-height: 100%;
         flex: 1 1 auto;
         min-height: 0;
-        -webkit-overflow-scrolling: touch;
     }
     
     .league-item { 
-        padding: 6px 10px; 
+        padding: 8px 12px; 
         flex-direction: row; 
         width: 100%;
-        min-width: 0;
+        min-width: auto;
         text-align: left;
         justify-content: space-between;
         align-items: center;
@@ -452,30 +405,24 @@ body {
     .league-left { 
         display: flex; 
         flex-direction: row; 
-        gap: 6px;
+        gap: 8px;
         align-items: center;
-        min-width: 0;
     }
     
     .league-name { 
         display: block;
-        font-size: 0.8rem;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
+        font-size: 0.85rem;
     }
     
     .league-count {
-        font-size: 0.95rem;
-        flex-shrink: 0;
+        font-size: 1rem;
     }
     
     .player-header { 
         position: absolute; 
-        top: 4px; 
-        left: 10px; 
-        font-size: 0.55rem; 
-        z-index: 1;
+        top: 6px; 
+        left: 12px; 
+        font-size: 0.6rem; 
     }
     
     /* Buttons in der Mitte zwischen den Spielern */
@@ -485,40 +432,25 @@ body {
         align-items: center;
         width: 100%;
         margin: 0;
-        padding: 4px 0;
+        padding: 6px 0;
         flex-shrink: 0;
-        height: 36px;
-        min-height: 36px;
-        max-height: 36px;
-        box-sizing: border-box;
+        min-height: 40px;
     }
     
     .top-btn {
-        padding: 8px 16px;
-        font-size: 0.8rem;
+        padding: 10px 20px;
+        font-size: 0.85rem;
     }
     
     /* Verhindere Zoom komplett auf Mobile */
-    *, *::before, *::after {
-        touch-action: manipulation !important;
-        -ms-touch-action: manipulation !important;
-        -webkit-user-select: none !important;
-        -moz-user-select: none !important;
-        -ms-user-select: none !important;
-        user-select: none !important;
+    * {
+        touch-action: manipulation;
+        -ms-touch-action: manipulation;
     }
     
     /* Verhindere Double-Tap-Zoom */
-    html, body {
-        touch-action: manipulation !important;
-        -ms-touch-action: manipulation !important;
-        -webkit-text-size-adjust: 100% !important;
-        -moz-text-size-adjust: 100% !important;
-        -ms-text-size-adjust: 100% !important;
-        text-size-adjust: 100% !important;
-    }
-    
-    input, textarea, select {
-        font-size: 16px !important; /* Verhindert Auto-Zoom auf iOS beim Fokus */
+    html {
+        touch-action: manipulation;
+        -ms-touch-action: manipulation;
     }
 }
