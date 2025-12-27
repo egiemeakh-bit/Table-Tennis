@@ -1,0 +1,341 @@
+:root {
+    --font-stack: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    --glass-bg: rgba(255, 255, 255, 0.1);
+    --glass-border: rgba(255, 255, 255, 0.2);
+    --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+    --text-primary: #ffffff;
+    --text-secondary: rgba(255, 255, 255, 0.6);
+    --bronze: #ffb38a;
+    --silver: #e0e0e0;
+    --gold: #ffe066;
+    --platinum: #b8d4e3;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-tap-highlight-color: transparent; }
+
+body {
+    font-family: var(--font-stack);
+    background-color: #000;
+    color: var(--text-primary);
+    height: 100vh;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.liquid-bg {
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    z-index: -1;
+    background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+    overflow: hidden;
+}
+
+.blob {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(80px);
+    opacity: 0.6;
+    animation: float 10s infinite ease-in-out alternate;
+}
+
+.blob-1 { width: 400px; height: 400px; background: #4facfe; top: -100px; left: -100px; }
+.blob-2 { width: 500px; height: 500px; background: #f093fb; bottom: -100px; right: -100px; }
+.blob-3 { width: 300px; height: 300px; background: #43e97b; top: 40%; left: 40%; opacity: 0.4;}
+
+@keyframes float { 0% { transform: translate(0, 0) scale(1); } 100% { transform: translate(30px, 50px) scale(1.1); } }
+
+.app-container {
+    display: flex;
+    width: 100%;
+    height: 100%;
+    max-width: 1200px;
+    padding: 20px;
+    gap: 20px;
+}
+
+.player-card {
+    flex: 1;
+    background: var(--glass-bg);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--glass-border);
+    border-radius: 30px;
+    box-shadow: var(--glass-shadow);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 30px 20px;
+    position: relative;
+}
+
+.player-header {
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    margin-bottom: 20px;
+    font-weight: 600;
+}
+
+.counter-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: auto; 
+    margin-top: 40px;
+}
+
+.current-wins-display {
+    font-size: 8rem;
+    font-weight: 200; 
+    line-height: 1;
+    margin: 10px 0;
+    background: linear-gradient(to bottom, #fff, #ccc);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.controls { display: flex; gap: 30px; margin-top: 20px; }
+
+.btn {
+    width: 70px; height: 70px;
+    border-radius: 50%;
+    border: 1px solid rgba(255,255,255,0.3);
+    background: rgba(255,255,255,0.05);
+    color: white;
+    font-size: 2rem;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn:active { transform: scale(0.9); background: rgba(255,255,255,0.2); }
+
+.btn-plus { background: rgba(255, 255, 255, 0.15); box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
+
+.btn-label {
+    margin-top: 10px;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.league-stack {
+    width: 100%;
+    display: flex;
+    flex-direction: column-reverse; 
+    gap: 12px;
+    margin-top: 40px;
+}
+
+.league-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 15px 20px;
+    border-radius: 16px;
+    background: rgba(0,0,0,0.2);
+    border: 1px solid rgba(255,255,255,0.05);
+    transition: all 0.3s ease;
+}
+
+.league-item.active { background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.3); }
+
+.league-left { display: flex; align-items: center; gap: 10px; }
+.league-icon { width: 12px; height: 12px; border-radius: 50%; box-shadow: 0 0 10px currentColor; }
+.league-name { font-weight: 500; font-size: 0.95rem; }
+.league-count { font-size: 1.2rem; font-weight: 700; }
+
+.bronze .league-icon { background: var(--bronze); color: var(--bronze); }
+.silver .league-icon { background: var(--silver); color: var(--silver); }
+.gold .league-icon { background: var(--gold); color: var(--gold); }
+.platinum .league-icon { background: var(--platinum); color: var(--platinum); }
+
+/* Popup Styles */
+.popup-overlay {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.popup-overlay.active { display: flex; }
+
+.popup-content {
+    background: var(--glass-bg);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--glass-border);
+    border-radius: 30px;
+    box-shadow: var(--glass-shadow);
+    padding: 30px;
+    max-width: 90%;
+    width: 500px;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.popup-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.popup-section {
+    margin-bottom: 25px;
+}
+
+.popup-section-title {
+    font-size: 1rem;
+    font-weight: 500;
+    margin-bottom: 10px;
+    color: var(--text-secondary);
+}
+
+.popup-input {
+    width: 100%;
+    padding: 12px 15px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid var(--glass-border);
+    border-radius: 12px;
+    color: var(--text-primary);
+    font-family: var(--font-stack);
+    font-size: 1rem;
+    margin-bottom: 10px;
+}
+
+.popup-input:focus {
+    outline: none;
+    border-color: rgba(255, 255, 255, 0.4);
+    background: rgba(255, 255, 255, 0.15);
+}
+
+.popup-select {
+    width: 100%;
+    padding: 12px 15px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid var(--glass-border);
+    border-radius: 12px;
+    color: var(--text-primary);
+    font-family: var(--font-stack);
+    font-size: 1rem;
+    margin-bottom: 10px;
+    cursor: pointer;
+}
+
+.popup-select:focus {
+    outline: none;
+    border-color: rgba(255, 255, 255, 0.4);
+}
+
+.popup-btn {
+    padding: 12px 24px;
+    background: rgba(255, 255, 255, 0.15);
+    border: 1px solid var(--glass-border);
+    border-radius: 12px;
+    color: var(--text-primary);
+    font-family: var(--font-stack);
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    width: 100%;
+    margin-bottom: 10px;
+}
+
+.popup-btn:hover {
+    background: rgba(255, 255, 255, 0.25);
+}
+
+.popup-btn:active {
+    transform: scale(0.98);
+}
+
+.popup-btn.danger {
+    background: rgba(255, 0, 0, 0.2);
+    border-color: rgba(255, 0, 0, 0.3);
+}
+
+.popup-btn.danger:hover {
+    background: rgba(255, 0, 0, 0.3);
+}
+
+.popup-btn.success {
+    background: rgba(0, 255, 0, 0.2);
+    border-color: rgba(0, 255, 0, 0.3);
+}
+
+.popup-btn.success:hover {
+    background: rgba(0, 255, 0, 0.3);
+}
+
+.confirmation-buttons {
+    display: flex;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.confirmation-buttons .popup-btn {
+    flex: 1;
+    margin: 0;
+}
+
+.top-buttons {
+    display: none;
+    justify-content: center;
+    gap: 15px;
+    margin-bottom: 10px;
+    position: relative;
+    z-index: 10;
+}
+
+.top-btn {
+    padding: 12px 24px;
+    background: var(--glass-bg);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--glass-border);
+    border-radius: 20px;
+    box-shadow: var(--glass-shadow);
+    color: var(--text-primary);
+    font-family: var(--font-stack);
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.top-btn:active {
+    transform: scale(0.95);
+    background: rgba(255, 255, 255, 0.2);
+}
+
+/* MOBILE FIXES */
+@media (max-width: 768px) {
+    .app-container { flex-direction: column; padding: 10px; }
+    .player-card { flex-direction: row; padding: 15px; gap: 15px; }
+    .counter-wrapper { margin: 0; width: 45%; }
+    .current-wins-display { font-size: 4.5rem; }
+    .controls { gap: 10px; }
+    .btn { width: 50px; height: 50px; font-size: 1.5rem; }
+    .league-stack { width: 55%; margin-top: 0; flex-direction: row-reverse; flex-wrap: wrap; justify-content: flex-end; gap: 5px; }
+    .league-item { padding: 8px 10px; flex-direction: column; min-width: 50px; text-align: center; }
+    
+    /* Zeige Icon auf Mobile, aber verstecke Text für Platz */
+    .league-left { display: flex; flex-direction: column; gap: 4px; }
+    .league-name { display: none; } 
+    .player-header { position: absolute; top: 8px; left: 15px; font-size: 0.65rem; }
+    
+    .top-buttons { display: flex; }
+}
+
