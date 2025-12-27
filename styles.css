@@ -420,7 +420,8 @@ body {
     
     .player-header { 
         position: absolute; 
-        top: calc(75% - 1rem);
+        top: calc(((50% - 2rem) + 0%) / 2);
+        transform: translateY(-50%);
         left: 0;
         width: 45%;
         text-align: left;
