@@ -15,78 +15,92 @@
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-tap-highlight-color: transparent; }
-        body { font-family: var(--font-stack); background-color: #000; color: var(--text-primary); height: 100vh; overflow: hidden; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        
+        body { 
+            font-family: var(--font-stack); 
+            background-color: #000; 
+            color: var(--text-primary); 
+            height: 100vh; 
+            height: 100dvh;
+            overflow: hidden; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: center; 
+        }
 
-        .liquid-bg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; background: linear-gradient(135deg, #0f0c29, #302b63, #24243e); overflow: hidden; }
+        .liquid-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; background: linear-gradient(135deg, #0f0c29, #302b63, #24243e); overflow: hidden; }
         .blob { position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.6; animation: float 10s infinite ease-in-out alternate; }
         .blob-1 { width: 400px; height: 400px; background: #4facfe; top: -100px; left: -100px; }
         .blob-2 { width: 500px; height: 500px; background: #f093fb; bottom: -100px; right: -100px; }
         @keyframes float { 0% { transform: translate(0, 0) scale(1); } 100% { transform: translate(30px, 50px) scale(1.1); } }
 
-        .app-container { display: flex; width: 100%; height: 100%; max-width: 1200px; padding: 20px; gap: 20px; flex-direction: column; position: relative; }
+        .app-container { 
+            display: flex; 
+            width: 100%; 
+            height: 100%; 
+            max-width: 1200px; 
+            padding: 20px; 
+            gap: 15px; 
+            flex-direction: column; 
+            position: relative; 
+            justify-content: space-between;
+        }
 
-        /* Central Navigation */
         .nav-center {
-            display: flex; justify-content: center; gap: 10px; width: 100%; padding: 10px 0; order: 2;
+            display: flex; justify-content: center; gap: 10px; width: 100%; padding: 5px 0; order: 2;
         }
 
         .btn-glass {
             background: var(--glass-bg); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
-            border: 1px solid var(--glass-border); padding: 10px 20px; border-radius: 25px;
-            color: white; font-size: 0.85rem; cursor: pointer; transition: 0.2s; font-weight: 500;
+            border: 1px solid var(--glass-border); padding: 8px 16px; border-radius: 25px;
+            color: white; font-size: 0.8rem; cursor: pointer; transition: 0.2s; font-weight: 500;
         }
-        .btn-glass:active { transform: scale(0.95); background: rgba(255,255,255,0.2); }
 
         .player-card { 
             flex: 1; background: var(--glass-bg); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
             border: 1px solid var(--glass-border); border-radius: 30px; display: flex; 
-            flex-direction: column; align-items: center; padding: 30px; position: relative;
+            flex-direction: column; align-items: center; padding: 20px; position: relative;
+            min-height: 0; /* Verhindert Overflow in Flexbox */
         }
 
         #p1-card { order: 1; }
         #p2-card { order: 3; }
 
-        .player-header { text-transform: uppercase; letter-spacing: 2px; font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 10px; font-weight: 600; }
-        .counter-wrapper { display: flex; flex-direction: column; align-items: center; margin-bottom: 20px; }
-        .current-wins-display { font-size: 6rem; font-weight: 200; line-height: 1; margin: 5px 0; background: linear-gradient(to bottom, #fff, #ccc); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .player-header { text-transform: uppercase; letter-spacing: 2px; font-size: 0.75rem; color: var(--text-secondary); margin-bottom: 5px; font-weight: 600; }
+        .counter-wrapper { display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .current-wins-display { font-size: clamp(3rem, 15vh, 6rem); font-weight: 200; line-height: 1; margin: 2px 0; background: linear-gradient(to bottom, #fff, #ccc); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
         
-        .controls { display: flex; gap: 20px; }
-        .btn-circle { width: 55px; height: 55px; border-radius: 50%; border: 1px solid var(--glass-border); background: rgba(255,255,255,0.1); color: white; font-size: 1.5rem; cursor: pointer; }
+        .controls { display: flex; gap: 15px; }
+        .btn-circle { width: 50px; height: 50px; border-radius: 50%; border: 1px solid var(--glass-border); background: rgba(255,255,255,0.1); color: white; font-size: 1.5rem; cursor: pointer; }
 
-        .league-stack { width: 100%; display: flex; gap: 10px; justify-content: center; }
+        .league-stack { width: 100%; display: flex; gap: 8px; justify-content: center; margin-top: auto; }
         .league-item { 
-            display: flex; flex-direction: column; align-items: center; gap: 5px; flex: 1; max-width: 80px;
-            padding: 10px; border-radius: 15px; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.05); transition: 0.3s;
+            display: flex; flex-direction: column; align-items: center; gap: 2px; flex: 1;
+            padding: 8px 4px; border-radius: 12px; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.05);
         }
-        .league-item.active { border-color: var(--glass-border); background: rgba(255,255,255,0.1); transform: translateY(-2px); }
-        .league-icon { width: 12px; height: 12px; border-radius: 50%; box-shadow: 0 0 10px currentColor; }
-        .league-name { font-size: 0.65rem; color: var(--text-secondary); text-transform: uppercase; }
-        .league-count { font-size: 1.1rem; font-weight: 700; }
+        .league-item.active { border-color: var(--glass-border); background: rgba(255,255,255,0.1); }
+        .league-icon { width: 8px; height: 8px; border-radius: 50%; box-shadow: 0 0 8px currentColor; }
+        .league-count { font-size: 1rem; font-weight: 700; }
 
-        /* Color Coding */
         .silver .league-icon { background: var(--silver); color: var(--silver); }
         .gold .league-icon { background: var(--gold); color: var(--gold); }
         .platinum .league-icon { background: var(--platinum); color: var(--platinum); }
 
-        /* Pop-up System */
         .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(15px); display: none; justify-content: center; align-items: center; z-index: 100; padding: 20px; }
-        .popup { background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 30px; padding: 25px; width: 100%; max-width: 400px; display: flex; flex-direction: column; gap: 15px; }
-        input, select { background: rgba(255,255,255,0.1); border: 1px solid var(--glass-border); padding: 12px; border-radius: 12px; color: white; outline: none; width: 100%; }
-        .popup-btns { display: flex; gap: 10px; margin-top: 10px; }
-        .btn-confirm { background: #43e97b; color: #000; flex: 1; border: none; padding: 12px; border-radius: 12px; font-weight: bold; }
-        .btn-cancel { background: rgba(255,255,255,0.1); color: white; flex: 1; border: none; padding: 12px; border-radius: 12px; }
+        .popup { background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 30px; padding: 20px; width: 100%; max-width: 350px; display: flex; flex-direction: column; gap: 12px; }
+        input, select { background: rgba(255,255,255,0.1); border: 1px solid var(--glass-border); padding: 10px; border-radius: 10px; color: white; outline: none; width: 100%; }
 
         @media (max-width: 768px) {
-            .app-container { padding: 10px; gap: 10px; height: 100vh; justify-content: space-around; }
-            .player-card { flex-direction: row; padding: 15px; height: auto; min-height: 160px; width: 100%; justify-content: space-between; }
-            .counter-wrapper { width: 40%; margin-bottom: 0; }
+            .app-container { padding: 10px; gap: 8px; }
+            .player-card { flex-direction: row; padding: 12px; height: 38%; min-height: 0; width: 100%; justify-content: space-around; align-items: center; }
+            .counter-wrapper { width: 45%; }
             .current-wins-display { font-size: 4rem; }
-            .controls { gap: 10px; }
-            .btn-circle { width: 45px; height: 45px; font-size: 1.2rem; }
-            .league-stack { width: 55%; flex-direction: row; align-items: center; }
-            .league-item { padding: 6px; min-width: 0; flex: 1; }
-            .league-name { display: none; }
-            .player-header { position: absolute; top: 8px; left: 15px; margin: 0; }
+            .btn-circle { width: 42px; height: 42px; font-size: 1.2rem; }
+            .league-stack { width: 50%; margin-top: 0; align-items: center; }
+            .league-item { padding: 5px; }
+            .player-header { position: absolute; top: 6px; left: 15px; font-size: 0.6rem; }
+            .nav-center { height: 10%; align-items: center; }
         }
     </style>
 </head>
@@ -127,24 +141,24 @@
 
     <div id="pop-settings" class="overlay">
         <div class="popup">
-            <h2 id="current-title" style="font-weight: 300;">Settings</h2>
+            <h2 style="font-weight: 300; font-size: 1.2rem;">Settings</h2>
             <select id="game-select" onchange="changeGame()"></select>
             <button class="btn-glass" onclick="createNewGame()">+ Neues Spiel</button>
             <input type="text" id="in-p1" placeholder="Name Spieler 1" onchange="updateNames()">
             <input type="text" id="in-p2" placeholder="Name Spieler 2" onchange="updateNames()">
-            <div class="popup-btns">
-                <button class="btn-cancel" style="background:rgba(255,50,50,0.2)" onclick="confirmReset()">Reset Game</button>
-                <button class="btn-cancel" onclick="closePopup()">Schließen</button>
+            <div style="display:flex; gap:10px;">
+                <button class="btn-glass" style="background:rgba(255,50,50,0.2); flex:1" onclick="confirmReset()">Reset</button>
+                <button class="btn-glass" style="flex:1" onclick="closePopup()">Close</button>
             </div>
         </div>
     </div>
 
     <div id="pop-confirm" class="overlay">
         <div class="popup">
-            <h2>Zurücksetzen?</h2>
-            <div class="popup-btns">
-                <button class="btn-confirm" onclick="executeReset()">✓ Ja</button>
-                <button class="btn-cancel" onclick="openPopup('settings')">✕ Nein</button>
+            <h2>Reset?</h2>
+            <div style="display:flex; gap:10px;">
+                <button class="btn-glass" style="background:#43e97b; color:#000; flex:1" onclick="executeReset()">✓ Ja</button>
+                <button class="btn-glass" style="flex:1" onclick="openPopup('settings')">✕ Nein</button>
             </div>
         </div>
     </div>
@@ -152,8 +166,8 @@
     <div id="pop-achievements" class="overlay">
         <div class="popup">
             <h2>Achievements</h2>
-            <p style="color:var(--text-secondary); text-align:center; padding:20px;">Demnächst...</p>
-            <button class="btn-cancel" onclick="closePopup()">Schließen</button>
+            <p style="color:var(--text-secondary); text-align:center;">Coming Soon</p>
+            <button class="btn-glass" onclick="closePopup()">Schließen</button>
         </div>
     </div>
 
@@ -174,8 +188,7 @@
         function modifyScore(pIdx, change) {
             if (change > 0) addWin(pIdx, 0);
             else if (players[pIdx].scores[0] > 0) players[pIdx].scores[0]--;
-            updateUI();
-            saveData();
+            updateUI(); saveData();
         }
 
         function addWin(pIdx, lIdx) {
@@ -196,13 +209,15 @@
         async function loadGames() {
             const { data } = await supabaseClient.from('league_storage').select('*');
             const select = document.getElementById('game-select');
-            select.innerHTML = '';
-            data.forEach(game => {
-                const opt = document.createElement('option');
-                opt.value = game.id; opt.textContent = game.title;
-                select.appendChild(opt);
-            });
-            if (!currentGameId && data.length > 0) selectGame(data[0]);
+            if (data) {
+                select.innerHTML = '';
+                data.forEach(game => {
+                    const opt = document.createElement('option');
+                    opt.value = game.id; opt.textContent = game.title;
+                    select.appendChild(opt);
+                });
+                if (!currentGameId && data.length > 0) selectGame(data[0]);
+            }
         }
 
         async function createNewGame() {
@@ -253,12 +268,11 @@
                 document.getElementById(`p${pIdx+1}-label`).innerText = p.name;
                 const container = document.getElementById(`p${pIdx+1}-leagues`);
                 container.innerHTML = '';
-                // Nur Silber, Gold, Platin anzeigen (Bronze ist der Haupt-Counter)
                 [1, 2, 3].forEach(idx => {
                     const league = leagueConfig[idx];
                     const item = document.createElement('div');
                     item.className = `league-item ${league.class} ${p.scores[idx] > 0 ? 'active' : ''}`;
-                    item.innerHTML = `<div class="league-icon"></div><span class="league-name">${league.name}</span><div class="league-count">${p.scores[idx]}</div>`;
+                    item.innerHTML = `<div class="league-icon"></div><div class="league-count">${p.scores[idx]}</div>`;
                     container.appendChild(item);
                 });
             });
@@ -268,7 +282,6 @@
             document.querySelectorAll('.overlay').forEach(el => el.style.display = 'none');
             document.getElementById('pop-' + id).style.display = 'flex';
         }
-
         function closePopup() { document.querySelectorAll('.overlay').forEach(el => el.style.display = 'none'); }
         function confirmReset() { openPopup('confirm'); }
 
