@@ -161,42 +161,92 @@ document.addEventListener('click', (e) => {
     }
 });
 
-// Verhindere Double-Tap-Zoom auf Mobile
-let lastTouchEnd = 0;
-document.addEventListener('touchend', function (event) {
-    const now = Date.now();
-    if (now - lastTouchEnd <= 300) {
-        event.preventDefault();
-    }
-    lastTouchEnd = now;
-}, false);
-
-// Verhindere Pinch-Zoom
-document.addEventListener('gesturestart', function (e) {
-    e.preventDefault();
-});
-
-document.addEventListener('gesturechange', function (e) {
-    e.preventDefault();
-});
-
-document.addEventListener('gestureend', function (e) {
-    e.preventDefault();
-});
-
-// Verhindere Zoom mit Strg+/- oder Cmd+/-
-document.addEventListener('keydown', function(e) {
-    if ((e.ctrlKey || e.metaKey) && (e.keyCode === 61 || e.keyCode === 107 || e.keyCode === 173 || e.keyCode === 109 || e.keyCode === 187 || e.keyCode === 189)) {
+// Verhindere Zoom komplett - Stärkere Implementierung
+(function() {
+    let lastTouchEnd = 0;
+    let touchStartDistance = 0;
+    
+    // Verhindere Double-Tap-Zoom
+    document.addEventListener('touchend', function (event) {
+        const now = Date.now();
+        if (now - lastTouchEnd <= 300) {
+            event.preventDefault();
+            event.stopPropagation();
+        }
+        lastTouchEnd = now;
+    }, { passive: false });
+    
+    // Verhindere Pinch-Zoom
+    document.addEventListener('touchstart', function(e) {
+        if (e.touches.length === 2) {
+            touchStartDistance = Math.hypot(
+                e.touches[0].clientX - e.touches[1].clientX,
+                e.touches[0].clientY - e.touches[1].clientY
+            );
+        }
+    }, { passive: false });
+    
+    document.addEventListener('touchmove', function(e) {
+        if (e.touches.length === 2) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+    }, { passive: false });
+    
+    // Verhindere Gesture-Zoom (iOS Safari)
+    document.addEventListener('gesturestart', function (e) {
         e.preventDefault();
-    }
-});
-
-// Verhindere Zoom mit Mausrad bei gedrückter Strg/Cmd
-document.addEventListener('wheel', function(e) {
-    if (e.ctrlKey || e.metaKey) {
+        e.stopPropagation();
+    }, { passive: false });
+    
+    document.addEventListener('gesturechange', function (e) {
         e.preventDefault();
+        e.stopPropagation();
+    }, { passive: false });
+    
+    document.addEventListener('gestureend', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+    }, { passive: false });
+    
+    // Verhindere Zoom mit Strg+/- oder Cmd+/-
+    document.addEventListener('keydown', function(e) {
+        if ((e.ctrlKey || e.metaKey) && (e.keyCode === 61 || e.keyCode === 107 || e.keyCode === 173 || e.keyCode === 109 || e.keyCode === 187 || e.keyCode === 189 || e.key === '+' || e.key === '-' || e.key === '=')) {
+            e.preventDefault();
+            e.stopPropagation();
+            return false;
+        }
+    }, { passive: false });
+    
+    // Verhindere Zoom mit Mausrad bei gedrückter Strg/Cmd
+    document.addEventListener('wheel', function(e) {
+        if (e.ctrlKey || e.metaKey) {
+            e.preventDefault();
+            e.stopPropagation();
+            return false;
+        }
+    }, { passive: false });
+    
+    // Verhindere Zoom durch Viewport-Manipulation
+    const metaViewport = document.querySelector('meta[name="viewport"]');
+    if (metaViewport) {
+        metaViewport.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover, shrink-to-fit=no');
     }
-}, { passive: false });
+    
+    // Verhindere Zoom durch Text-Größenänderung
+    document.addEventListener('DOMContentLoaded', function() {
+        const style = document.createElement('style');
+        style.textContent = `
+            * {
+                -webkit-text-size-adjust: 100% !important;
+                -moz-text-size-adjust: 100% !important;
+                -ms-text-size-adjust: 100% !important;
+                text-size-adjust: 100% !important;
+            }
+        `;
+        document.head.appendChild(style);
+    });
+})();
 
 // Initialize on load
 window.addEventListener('DOMContentLoaded', () => {
