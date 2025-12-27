@@ -3,300 +3,100 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Liquid League Pro</title>
-    <style>
-        :root {
-            --font-stack: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            --glass-bg: rgba(255, 255, 255, 0.1);
-            --glass-border: rgba(255, 255, 255, 0.2);
-            --text-primary: #ffffff;
-            --text-secondary: rgba(255, 255, 255, 0.6);
-            --bronze: #ffb38a; --silver: #e0e0e0; --gold: #ffe066; --platinum: #e1bee7;
-        }
-
-        * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-tap-highlight-color: transparent; }
-        body { font-family: var(--font-stack); background-color: #000; color: var(--text-primary); height: 100vh; overflow: hidden; display: flex; justify-content: center; align-items: center; }
-
-        .liquid-bg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; background: linear-gradient(135deg, #0f0c29, #302b63, #24243e); overflow: hidden; }
-        .blob { position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.6; animation: float 10s infinite ease-in-out alternate; }
-        .blob-1 { width: 400px; height: 400px; background: #4facfe; top: -100px; left: -100px; }
-        .blob-2 { width: 500px; height: 500px; background: #f093fb; bottom: -100px; right: -100px; }
-        
-        @keyframes float { 0% { transform: translate(0, 0) scale(1); } 100% { transform: translate(30px, 50px) scale(1.1); } }
-
-        .app-container { display: flex; width: 100%; height: 100%; max-width: 1200px; padding: 20px; gap: 20px; position: relative; }
-
-        /* Navigation Central */
-        .nav-center {
-            position: absolute; top: 20px; left: 50%; transform: translateX(-50%);
-            display: flex; gap: 10px; z-index: 10;
-        }
-
-        .btn-glass {
-            background: var(--glass-bg); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
-            border: 1px solid var(--glass-border); padding: 8px 16px; border-radius: 20px;
-            color: white; font-size: 0.8rem; cursor: pointer; transition: 0.2s;
-        }
-        .btn-glass:active { transform: scale(0.95); }
-
-        .player-card { flex: 1; background: var(--glass-bg); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); border-radius: 30px; display: flex; flex-direction: column; align-items: center; padding: 50px 20px; position: relative; }
-        .player-header { text-transform: uppercase; letter-spacing: 2px; font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 20px; font-weight: 600; }
-
-        .counter-wrapper { display: flex; flex-direction: column; align-items: center; margin-bottom: auto; margin-top: 20px; }
-        .current-wins-display { font-size: 6rem; font-weight: 200; line-height: 1; margin: 10px 0; background: linear-gradient(to bottom, #fff, #ccc); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        
-        .controls { display: flex; gap: 20px; }
-        .btn-circle { width: 60px; height: 60px; border-radius: 50%; border: 1px solid var(--glass-border); background: rgba(255,255,255,0.1); color: white; font-size: 1.5rem; cursor: pointer; }
-
-        .league-stack { width: 100%; display: flex; flex-direction: column-reverse; gap: 8px; margin-top: 20px; }
-        .league-item { display: flex; align-items: center; justify-content: space-between; padding: 12px 18px; border-radius: 14px; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.05); }
-        .league-item.active { border-color: var(--glass-border); background: rgba(255,255,255,0.1); }
-        .league-icon { width: 10px; height: 10px; border-radius: 50%; box-shadow: 0 0 8px currentColor; }
-        
-        /* Colors */
-        .bronze .league-icon { background: var(--bronze); color: var(--bronze); }
-        .silver .league-icon { background: var(--silver); color: var(--silver); }
-        .gold .league-icon { background: var(--gold); color: var(--gold); }
-        .platinum .league-icon { background: var(--platinum); color: var(--platinum); }
-
-        /* Pop-up System */
-        .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(10px); display: none; justify-content: center; align-items: center; z-index: 100; padding: 20px; }
-        .popup { background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 30px; padding: 25px; width: 100%; max-width: 400px; display: flex; flex-direction: column; gap: 15px; }
-        .popup h2 { font-size: 1.2rem; margin-bottom: 10px; font-weight: 400; }
-        .input-group { display: flex; flex-direction: column; gap: 5px; }
-        .input-group label { font-size: 0.7rem; color: var(--text-secondary); }
-        input, select { background: rgba(255,255,255,0.1); border: 1px solid var(--glass-border); padding: 10px; border-radius: 10px; color: white; outline: none; }
-        .popup-btns { display: flex; gap: 10px; margin-top: 10px; }
-        .btn-confirm { background: #43e97b; color: #000; flex: 1; border: none; padding: 12px; border-radius: 10px; font-weight: bold; }
-        .btn-cancel { background: rgba(255,255,255,0.1); color: white; flex: 1; border: none; padding: 12px; border-radius: 10px; }
-
-        @media (max-width: 768px) {
-            .app-container { flex-direction: column; padding-top: 80px; }
-            .player-card { flex-direction: row; padding: 20px; padding-top: 30px; height: 180px; }
-            .counter-wrapper { width: 40%; margin-top: 0; }
-            .current-wins-display { font-size: 4rem; }
-            .league-stack { width: 60%; flex-direction: row-reverse; flex-wrap: wrap; justify-content: flex-end; margin-top: 0; }
-            .league-item { padding: 8px; min-width: 50px; flex-direction: column; }
-            .league-name { display: none; }
-            .player-header { position: absolute; top: 10px; left: 20px; font-size: 0.6rem; }
-            .nav-center { width: 90%; justify-content: center; }
-        }
-    </style>
+    <title>Liquid League Tracker (Fixed Colors)</title>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 
-    <div class="liquid-bg"><div class="blob blob-1"></div><div class="blob blob-2"></div></div>
-
-    <div class="nav-center">
-        <button class="btn-glass" onclick="openPopup('achievements')">Achievements</button>
-        <button class="btn-glass" onclick="openPopup('settings')">Settings</button>
+    <div class="liquid-bg">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+        <div class="blob blob-3"></div>
     </div>
 
     <div class="app-container">
+        <div class="top-buttons">
+            <button class="top-btn" onclick="openAchievements()">Achievements</button>
+            <button class="top-btn" onclick="openSettings()">Settings</button>
+        </div>
+        
         <div class="player-card" id="p1-card">
-            <div class="player-header" id="p1-label">Spieler 1</div>
+            <div class="player-header" id="p1-header">Spieler 1</div>
             <div class="counter-wrapper">
                 <div class="current-wins-display" id="p1-display">0</div>
+                <div class="btn-label"><div class="league-icon" style="background: var(--bronze)"></div> Bronze</div>
                 <div class="controls">
-                    <button class="btn-circle" onclick="modifyScore(0, -1)">-</button>
-                    <button class="btn-circle" onclick="modifyScore(0, 1)">+</button>
+                    <button class="btn" onclick="modifyScore(0, -1)">-</button>
+                    <button class="btn btn-plus" onclick="modifyScore(0, 1)">+</button>
                 </div>
             </div>
             <div id="p1-leagues" class="league-stack"></div>
         </div>
 
         <div class="player-card" id="p2-card">
-            <div class="player-header" id="p2-label">Spieler 2</div>
+            <div class="player-header" id="p2-header">Spieler 2</div>
             <div class="counter-wrapper">
                 <div class="current-wins-display" id="p2-display">0</div>
+                <div class="btn-label"><div class="league-icon" style="background: var(--bronze)"></div> Bronze</div>
                 <div class="controls">
-                    <button class="btn-circle" onclick="modifyScore(1, -1)">-</button>
-                    <button class="btn-circle" onclick="modifyScore(1, 1)">+</button>
+                    <button class="btn" onclick="modifyScore(1, -1)">-</button>
+                    <button class="btn btn-plus" onclick="modifyScore(1, 1)">+</button>
                 </div>
             </div>
             <div id="p2-leagues" class="league-stack"></div>
         </div>
     </div>
 
-    <div id="pop-settings" class="overlay">
-        <div class="popup">
-            <h2 id="current-title">Settings</h2>
-            <div class="input-group">
-                <label>Spiel Auswahl / Neu</label>
-                <select id="game-select" onchange="changeGame()"></select>
-                <button class="btn-glass" style="margin-top:5px" onclick="createNewGame()">+ Neues Spiel erstellen</button>
+    <!-- Settings Popup -->
+    <div class="popup-overlay" id="settings-popup">
+        <div class="popup-content">
+            <div class="popup-title">Settings</div>
+            
+            <div class="popup-section">
+                <div class="popup-section-title">Spiel auswählen/erstellen</div>
+                <select class="popup-select" id="game-select" onchange="onGameSelect()">
+                    <option value="">Neues Spiel erstellen...</option>
+                </select>
+                <input type="text" class="popup-input" id="new-game-title" placeholder="Spieltitel (bei neuem Spiel erforderlich)" style="display: none;">
+                <button class="popup-btn" id="create-game-btn" onclick="createNewGame()" style="display: none;">Spiel erstellen</button>
             </div>
-            <div class="input-group">
-                <label>Spieler Namen</label>
-                <input type="text" id="in-p1" placeholder="Spieler 1" onchange="updateNames()">
-                <input type="text" id="in-p2" placeholder="Spieler 2" onchange="updateNames()">
+
+            <div class="popup-section">
+                <div class="popup-section-title">Spielernamen ändern</div>
+                <input type="text" class="popup-input" id="p1-name-input" placeholder="Spieler 1 Name">
+                <input type="text" class="popup-input" id="p2-name-input" placeholder="Spieler 2 Name">
+                <button class="popup-btn" onclick="savePlayerNames()">Namen speichern</button>
             </div>
-            <div class="popup-btns">
-                <button class="btn-cancel" style="background:rgba(255,50,50,0.2)" onclick="confirmReset()">Reset Game</button>
-                <button class="btn-cancel" onclick="closePopup()">Schließen</button>
+
+            <div class="popup-section">
+                <div class="popup-section-title">Aktuelles Spiel zurücksetzen</div>
+                <button class="popup-btn danger" onclick="showResetConfirmation()">Reset current Game</button>
+                <div id="reset-confirmation" style="display: none;">
+                    <p style="margin: 15px 0; text-align: center;">Bist du sicher, dass du den aktuellen Spielstand zurücksetzen möchtest?</p>
+                    <div class="confirmation-buttons">
+                        <button class="popup-btn success" onclick="confirmReset()">✓</button>
+                        <button class="popup-btn danger" onclick="cancelReset()">✗</button>
+                    </div>
+                </div>
             </div>
+
+            <button class="popup-btn" onclick="closeSettings()" style="margin-top: 20px;">Schließen</button>
         </div>
     </div>
 
-    <div id="pop-confirm" class="overlay">
-        <div class="popup">
-            <h2>Spiel zurücksetzen?</h2>
-            <p style="font-size:0.8rem; color:var(--text-secondary)">Bist du sicher, dass du alle Punkte löschen willst?</p>
-            <div class="popup-btns">
-                <button class="btn-confirm" onclick="executeReset()">✓ Ja</button>
-                <button class="btn-cancel" onclick="openPopup('settings')">✕ Abbrechen</button>
+    <!-- Achievements Popup -->
+    <div class="popup-overlay" id="achievements-popup">
+        <div class="popup-content">
+            <div class="popup-title">Achievements</div>
+            <div style="text-align: center; padding: 40px 0; color: var(--text-secondary);">
+                Coming soon...
             </div>
-        </div>
-    </div>
-
-    <div id="pop-achievements" class="overlay">
-        <div class="popup">
-            <h2>Achievements</h2>
-            <p style="color:var(--text-secondary); text-align:center; padding:20px;">Noch keine Achievements verfügbar.</p>
-            <button class="btn-cancel" onclick="closePopup()">Schließen</button>
+            <button class="popup-btn" onclick="closeAchievements()" style="margin-top: 20px;">Schließen</button>
         </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script>
-        const SUPABASE_URL = 'https://ylzxelchfnbalgmajjiw.supabase.co';
-        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlsenhlbGNoZm5iYWxnbWFqaml3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY3NTI2ODIsImV4cCI6MjA4MjMyODY4Mn0.mNOT9VPHh5f9xSir8UbCU0Ao09pyv3J4Cwyuav5BJAs';
-        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
-        const leagueConfig = [
-            { name: "Bronze", class: "bronze" }, { name: "Silber", class: "silver" }, 
-            { name: "Gold", class: "gold" }, { name: "Platin", class: "platinum" }
-        ];
-
-        let currentGameId = null;
-        let players = [{ scores: [0,0,0,0], name: 'Spieler 1' }, { scores: [0,0,0,0], name: 'Spieler 2' }];
-
-        // --- CORE LOGIC ---
-        function modifyScore(pIdx, change) {
-            if (change > 0) addWin(pIdx, 0);
-            else if (players[pIdx].scores[0] > 0) players[pIdx].scores[0]--;
-            updateUI();
-            saveData();
-        }
-
-        function addWin(pIdx, lIdx) {
-            if (lIdx >= leagueConfig.length) return;
-            players[pIdx].scores[lIdx]++;
-
-            // Platinum (Index 3) ist unendlich
-            if (leagueConfig[lIdx].name === "Platin") return;
-
-            // Gold/Silber/Bronze Cap bei 3
-            if (players[pIdx].scores[lIdx] >= 3) {
-                players[0].scores[lIdx] = 0;
-                players[1].scores[lIdx] = 0;
-                addWin(pIdx, lIdx + 1);
-            }
-        }
-
-        // --- DATABASE ---
-        async function loadGames() {
-            const { data } = await supabaseClient.from('league_storage').select('*');
-            const select = document.getElementById('game-select');
-            select.innerHTML = '';
-            data.forEach(game => {
-                const opt = document.createElement('option');
-                opt.value = game.id;
-                opt.textContent = game.title;
-                select.appendChild(opt);
-            });
-            if (!currentGameId && data.length > 0) selectGame(data[0]);
-        }
-
-        async function createNewGame() {
-            const title = prompt("Titel des Spiels:", "Mein neues Spiel");
-            if (!title) return;
-            const { data } = await supabaseClient.from('league_storage').insert([{ title: title }]).select();
-            await loadGames();
-            selectGame(data[0]);
-        }
-
-        function selectGame(game) {
-            currentGameId = game.id;
-            players[0].scores = game.data.p1;
-            players[1].scores = game.data.p2;
-            players[0].name = game.p1_name;
-            players[1].name = game.p2_name;
-            document.getElementById('in-p1').value = game.p1_name;
-            document.getElementById('in-p2').value = game.p2_name;
-            document.getElementById('game-select').value = game.id;
-            updateUI();
-        }
-
-        async function changeGame() {
-            const id = document.getElementById('game-select').value;
-            const { data } = await supabaseClient.from('league_storage').select('*').eq('id', id).single();
-            selectGame(data);
-        }
-
-        async function saveData() {
-            if (!currentGameId) return;
-            await supabaseClient.from('league_storage').update({ 
-                data: { p1: players[0].scores, p2: players[1].scores },
-                p1_name: players[0].name, p2_name: players[1].name
-            }).eq('id', currentGameId);
-        }
-
-        function updateNames() {
-            players[0].name = document.getElementById('in-p1').value;
-            players[1].name = document.getElementById('in-p2').value;
-            updateUI();
-            saveData();
-        }
-
-        async function executeReset() {
-            players.forEach(p => p.scores = [0,0,0,0]);
-            updateUI();
-            await saveData();
-            openPopup('settings');
-        }
-
-        // --- UI ---
-        function updateUI() {
-            [0, 1].forEach(pIdx => {
-                const p = players[pIdx];
-                document.getElementById(`p${pIdx+1}-display`).innerText = p.scores[0];
-                document.getElementById(`p${pIdx+1}-label`).innerText = p.name;
-                const container = document.getElementById(`p${pIdx+1}-leagues`);
-                container.innerHTML = '';
-                leagueConfig.forEach((league, idx) => {
-                    if (idx === 0) return;
-                    const item = document.createElement('div');
-                    item.className = `league-item ${league.class} ${p.scores[idx] > 0 ? 'active' : ''}`;
-                    item.innerHTML = `<div class="league-left"><div class="league-icon"></div><span class="league-name">${league.name}</span></div><div class="league-count">${p.scores[idx]}</div>`;
-                    container.appendChild(item);
-                });
-            });
-        }
-
-        function openPopup(id) {
-            document.querySelectorAll('.overlay').forEach(el => el.style.display = 'none');
-            document.getElementById('pop-' + id).style.display = 'flex';
-        }
-
-        function closePopup() {
-            document.querySelectorAll('.overlay').forEach(el => el.style.display = 'none');
-        }
-
-        function confirmReset() { openPopup('confirm'); }
-
-        // Realtime Sync
-        supabaseClient.channel('sync').on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'league_storage' }, payload => {
-            if (payload.new.id === currentGameId) {
-                players[0].scores = payload.new.data.p1;
-                players[1].scores = payload.new.data.p2;
-                players[0].name = payload.new.p1_name;
-                players[1].name = payload.new.p2_name;
-                updateUI();
-            }
-        }).subscribe();
-
-        loadGames();
-    </script>
+    <script src="database.js"></script>
+    <script src="app.js"></script>
 </body>
 </html>
