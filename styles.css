@@ -420,14 +420,14 @@ body {
     
     .player-header { 
         position: absolute; 
-        top: calc(50% - 2.2rem);
-        left: 22.5%;
-        transform: translateX(-50%);
+        top: calc(50% - 2.5rem);
+        left: 0;
+        width: 45%;
+        text-align: left;
+        padding-left: 12px;
         font-size: 0.65rem;
         white-space: nowrap;
         z-index: 1;
-        text-align: center;
-        width: 22.5%;
     }
     
     /* Buttons in der Mitte zwischen den Spielern */
