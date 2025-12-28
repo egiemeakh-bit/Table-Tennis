@@ -12,6 +12,8 @@ CREATE TABLE IF NOT EXISTS games (
     sound_win TEXT,
     sound_promoted TEXT,
     sound_comeback TEXT,
+    p1_comeback_count INTEGER NOT NULL DEFAULT 0,
+    p2_comeback_count INTEGER NOT NULL DEFAULT 0,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
@@ -26,6 +28,12 @@ BEGIN
     END IF;
     IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='games' AND column_name='sound_comeback') THEN
         ALTER TABLE games ADD COLUMN sound_comeback TEXT;
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='games' AND column_name='p1_comeback_count') THEN
+        ALTER TABLE games ADD COLUMN p1_comeback_count INTEGER NOT NULL DEFAULT 0;
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='games' AND column_name='p2_comeback_count') THEN
+        ALTER TABLE games ADD COLUMN p2_comeback_count INTEGER NOT NULL DEFAULT 0;
     END IF;
 END $$;
 

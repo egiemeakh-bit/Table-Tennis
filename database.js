@@ -59,11 +59,23 @@ async function loadGameData(gameId) {
             if (data.sound_comeback) soundFiles.comeback = data.sound_comeback;
             displaySounds();
             
+            // Lade Comeback-Counts aus der Datenbank
+            comebackCounts[0] = data.p1_comeback_count || 0;
+            comebackCounts[1] = data.p2_comeback_count || 0;
+            
             // Aktualisiere previousTotalScores beim Laden
             previousTotalScores[0] = getTotalScore(0);
             previousTotalScores[1] = getTotalScore(1);
             updateUI();
             updatePlayerNames();
+            
+            // Zeige Badges basierend auf geladenen Counts
+            if (comebackCounts[0] > 0) {
+                showComebackBadge(0);
+            }
+            if (comebackCounts[1] > 0) {
+                showComebackBadge(1);
+            }
         }
     } catch (err) {
         console.error("Datenbank-Fehler beim Laden:", err.message);
@@ -80,7 +92,9 @@ async function createDefaultGame() {
             p2_scores: [0, 0, 0, 0],
             sound_win: null,
             sound_promoted: null,
-            sound_comeback: null
+            sound_comeback: null,
+            p1_comeback_count: 0,
+            p2_comeback_count: 0
         }).select().single();
         if (error) {
             if (error.message.includes('relation') && error.message.includes('does not exist')) {
@@ -107,7 +121,9 @@ async function saveData() {
             p2_name: playerNames[1],
             sound_win: soundFiles.win || null,
             sound_promoted: soundFiles.promoted || null,
-            sound_comeback: soundFiles.comeback || null
+            sound_comeback: soundFiles.comeback || null,
+            p1_comeback_count: comebackCounts[0],
+            p2_comeback_count: comebackCounts[1]
         }).eq('id', currentGameId);
         if (error) throw error;
     } catch (err) {
@@ -147,7 +163,9 @@ async function createNewGame() {
             p2_scores: [0, 0, 0, 0],
             sound_win: null,
             sound_promoted: null,
-            sound_comeback: null
+            sound_comeback: null,
+            p1_comeback_count: 0,
+            p2_comeback_count: 0
         }).select().single();
         if (error) throw error;
         currentGameId = data.id;
@@ -168,13 +186,22 @@ async function confirmReset() {
     try {
         const { error } = await supabaseClient.from('games').update({
             p1_scores: [0, 0, 0, 0],
-            p2_scores: [0, 0, 0, 0]
+            p2_scores: [0, 0, 0, 0],
+            p1_comeback_count: 0,
+            p2_comeback_count: 0
         }).eq('id', currentGameId);
         if (error) throw error;
         players[0].scores = [0, 0, 0, 0];
         players[1].scores = [0, 0, 0, 0];
         previousTotalScores[0] = 0;
         previousTotalScores[1] = 0;
+        comebackCounts[0] = 0;
+        comebackCounts[1] = 0;
+        // Entferne Comeback-Badges
+        const p1Badge = document.querySelector('#p1-header .comeback-badge');
+        const p2Badge = document.querySelector('#p2-header .comeback-badge');
+        if (p1Badge) p1Badge.remove();
+        if (p2Badge) p2Badge.remove();
         updateUI();
         document.getElementById('reset-confirmation').style.display = 'none';
     } catch (err) {
@@ -232,10 +259,36 @@ supabaseClient.channel('db-changes').on('postgres_changes',
             if (payload.new.sound_comeback) soundFiles.comeback = payload.new.sound_comeback;
             displaySounds();
             
+            // Lade Comeback-Counts aus der Datenbank
+            comebackCounts[0] = payload.new.p1_comeback_count || 0;
+            comebackCounts[1] = payload.new.p2_comeback_count || 0;
+            
             previousTotalScores[0] = getTotalScore(0);
             previousTotalScores[1] = getTotalScore(1);
             updateUI();
             updatePlayerNames();
+            
+            // Aktualisiere Badges basierend auf geladenen Counts
+            const p1Badge = document.querySelector('#p1-header .comeback-badge');
+            const p2Badge = document.querySelector('#p2-header .comeback-badge');
+            if (comebackCounts[0] > 0) {
+                if (!p1Badge) {
+                    showComebackBadge(0);
+                } else {
+                    p1Badge.querySelector('.comeback-count').textContent = comebackCounts[0];
+                }
+            } else if (p1Badge) {
+                p1Badge.remove();
+            }
+            if (comebackCounts[1] > 0) {
+                if (!p2Badge) {
+                    showComebackBadge(1);
+                } else {
+                    p2Badge.querySelector('.comeback-count').textContent = comebackCounts[1];
+                }
+            } else if (p2Badge) {
+                p2Badge.remove();
+            }
         }
     }
 ).subscribe();
