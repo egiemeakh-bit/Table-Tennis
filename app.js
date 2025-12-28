@@ -17,6 +17,11 @@ let soundFiles = {
     comeback: null
 };
 let previousTotalScores = [0, 0]; // Für Comeback-Erkennung
+let comebackCounts = [0, 0]; // Anzahl der Comebacks pro Spieler
+let comebackTracking = { 
+    p0: { wasBehind: false, deficit: 0 }, 
+    p1: { wasBehind: false, deficit: 0 } 
+}; // Tracking für Comeback über Promotionen hinweg
 
 // Score Management
 function modifyScore(playerIndex, change) {
@@ -27,30 +32,112 @@ function modifyScore(playerIndex, change) {
 }
 
 function getTotalScore(pIdx) {
-    return players[pIdx].scores.reduce((a, b) => a + b, 0);
+    // Gewichtete Punktzahl: Bronze=1, Silber=3, Gold=9, Platin=27
+    // 1 Silber = 3 Bronze, 1 Gold = 3 Silber = 9 Bronze, 1 Platin = 3 Gold = 27 Bronze
+    const weights = [1, 3, 9, 27];
+    return players[pIdx].scores.reduce((total, score, idx) => {
+        return total + (score * weights[idx]);
+    }, 0);
 }
 
-function checkComeback(pIdx) {
+function checkComeback(pIdx, prevTotal0, prevTotal1, currentTotal0, currentTotal1) {
     const otherIdx = pIdx === 0 ? 1 : 0;
-    const currentTotal = getTotalScore(pIdx);
-    const otherTotal = getTotalScore(otherIdx);
-    const prevTotal = previousTotalScores[pIdx];
-    const prevOtherTotal = previousTotalScores[otherIdx];
+    const prevTotal = pIdx === 0 ? prevTotal0 : prevTotal1;
+    const prevOtherTotal = pIdx === 0 ? prevTotal1 : prevTotal0;
+    const currentTotal = pIdx === 0 ? currentTotal0 : currentTotal1;
+    const currentOtherTotal = pIdx === 0 ? currentTotal1 : currentTotal0;
     
-    // Prüfe ob Gegner 10+ Vorsprung hatte und man jetzt aufholt
-    if (prevOtherTotal - prevTotal >= 10 && currentTotal >= otherTotal) {
+    // Berechne Differenzen
+    // prevDiff: Differenz VOR dem aktuellen Punkt (pIdx - otherIdx)
+    // Negativ bedeutet: pIdx lag zurück
+    const prevDiff = prevTotal - prevOtherTotal;
+    
+    // currentDiff: Differenz NACH dem aktuellen Punkt (pIdx - otherIdx)
+    // 0 bedeutet: Gleichstand erreicht
+    const currentDiff = currentTotal - currentOtherTotal;
+    
+    // Update Comeback-Tracking: Wenn man 4+ Punkte zurücklag, merken wir uns das
+    // (auch wenn nach einer Promotion die Scores zurückgesetzt werden)
+    const trackingKey = pIdx === 0 ? 'p0' : 'p1';
+    if (prevDiff <= -4) {
+        comebackTracking[trackingKey].wasBehind = true;
+        comebackTracking[trackingKey].deficit = Math.abs(prevDiff);
+    }
+    
+    // Prüfe ob man jetzt Gleichstand erreicht hat
+    const hasReachedTie = Math.abs(currentDiff) < 0.1;
+    
+    // Comeback-Bedingung: 
+    // 1. pIdx lag 4+ Punkte zurück (prevDiff <= -4) ODER war vorher schon 4+ zurück (getrackt)
+    // 2. pIdx hat jetzt Gleichstand erreicht (currentDiff ist 0 oder sehr nah bei 0)
+    if ((prevDiff <= -4 || comebackTracking[trackingKey].wasBehind) && hasReachedTie) {
+        comebackCounts[pIdx]++;
+        showComebackBadge(pIdx);
+        showComebackContainer(pIdx);
+        // Reset Tracking nach erfolgreichem Comeback
+        comebackTracking[trackingKey].wasBehind = false;
+        comebackTracking[trackingKey].deficit = 0;
         return true;
     }
+    
+    // Wenn man jetzt vorne ist, reset das Tracking
+    if (currentDiff > 0) {
+        comebackTracking[trackingKey].wasBehind = false;
+        comebackTracking[trackingKey].deficit = 0;
+    }
+    
     return false;
 }
 
-function addWin(pIdx, leagueIdx) {
+function showComebackBadge(pIdx) {
+    const header = document.getElementById(pIdx === 0 ? 'p1-header' : 'p2-header');
+    if (!header) return;
+    
+    // Entferne vorhandenes Badge falls vorhanden
+    const existingBadge = header.querySelector('.comeback-badge');
+    if (existingBadge) {
+        existingBadge.remove();
+    }
+    
+    // Erstelle neues Badge mit Anzahl
+    const badge = document.createElement('span');
+    badge.className = 'comeback-badge';
+    badge.innerHTML = `🔥<span class="comeback-count">${comebackCounts[pIdx]}</span>`;
+    badge.title = `${comebackCounts[pIdx]} Comeback${comebackCounts[pIdx] > 1 ? 's' : ''}!`;
+    header.appendChild(badge);
+}
+
+function showComebackContainer(pIdx) {
+    const card = document.getElementById(pIdx === 0 ? 'p1-card' : 'p2-card');
+    if (!card) return;
+    
+    // Entferne vorhandenen Effekt falls vorhanden
+    card.classList.remove('comeback-active');
+    
+    // Füge flammenden Container-Effekt hinzu
+    card.classList.add('comeback-active');
+    
+    // Entferne Effekt nach 10 Sekunden
+    setTimeout(() => {
+        card.classList.remove('comeback-active');
+    }, 10000);
+}
+
+function addWin(pIdx, leagueIdx, skipSound = false) {
     if (leagueIdx >= leagueConfig.length) return;
+    
+    // Speichere Scores VOR dem Update für Comeback-Erkennung
+    const prevTotal0 = getTotalScore(0);
+    const prevTotal1 = getTotalScore(1);
     
     players[pIdx].scores[leagueIdx]++;
     
+    // Berechne aktuelle Scores NACH dem Update
+    const currentTotal0 = getTotalScore(0);
+    const currentTotal1 = getTotalScore(1);
+    
     // Prüfe auf Comeback NACH dem Score-Update
-    const isComeback = checkComeback(pIdx);
+    const isComeback = checkComeback(pIdx, prevTotal0, prevTotal1, currentTotal0, currentTotal1);
     
     // Gold ist auf 3 limitiert
     if (leagueConfig[leagueIdx].name === "Gold") {
@@ -68,10 +155,15 @@ function addWin(pIdx, leagueIdx) {
             previousTotalScores[1] = getTotalScore(1);
             
             // Platinum ist unbegrenzt, also einfach weiter erhöhen
-            addWin(pIdx, leagueIdx + 1);
-            
-            // Promoted Sound abspielen
-            playSound('promoted');
+            // Sound abspielen: Comeback hat höchste Priorität, dann Promotion
+            if (isComeback) {
+                playSound('comeback');
+                // Kein weiterer Sound bei rekursivem Aufruf
+                addWin(pIdx, leagueIdx + 1, true);
+            } else {
+                playSound('promoted');
+                addWin(pIdx, leagueIdx + 1, true);
+            }
             return;
         }
     }
@@ -79,15 +171,15 @@ function addWin(pIdx, leagueIdx) {
     // Platinum ist unbegrenzt
     if (leagueConfig[leagueIdx].name === "Platin") {
         // Aktualisiere previousTotalScores
-        previousTotalScores[0] = getTotalScore(0);
-        previousTotalScores[1] = getTotalScore(1);
+        previousTotalScores[0] = currentTotal0;
+        previousTotalScores[1] = currentTotal1;
         
-        // Prüfe auf Comeback
+        // Sound abspielen: Nur Comeback, kein Win-Sound
+        // Comeback hat immer Vorrang, auch wenn skipSound gesetzt ist
         if (isComeback) {
             playSound('comeback');
-        } else {
-            playSound('win');
         }
+        // Kein Win-Sound bei Platin
         return; // Keine Limitierung, einfach weiter erhöhen
     }
 
@@ -100,21 +192,30 @@ function addWin(pIdx, leagueIdx) {
         previousTotalScores[0] = getTotalScore(0);
         previousTotalScores[1] = getTotalScore(1);
         
-        addWin(pIdx, leagueIdx + 1);
-        
-        // Promoted Sound abspielen
-        playSound('promoted');
+        // Sound abspielen: Comeback hat höchste Priorität, dann Promotion
+        if (isComeback) {
+            playSound('comeback');
+            // Kein weiterer Sound bei rekursivem Aufruf
+            addWin(pIdx, leagueIdx + 1, true);
+        } else {
+            playSound('promoted');
+            addWin(pIdx, leagueIdx + 1, true);
+        }
+        // Kein Win-Sound bei Promotion
         return;
     }
     
     // Aktualisiere previousTotalScores
-    previousTotalScores[0] = getTotalScore(0);
-    previousTotalScores[1] = getTotalScore(1);
+    previousTotalScores[0] = currentTotal0;
+    previousTotalScores[1] = currentTotal1;
     
     // Normales Win (kein Promotion)
+    // Sound abspielen: Nur Comeback oder Win, kein Promotion
+    // Comeback hat immer Vorrang, auch wenn skipSound gesetzt ist
     if (isComeback) {
         playSound('comeback');
-    } else {
+    } else if (!skipSound) {
+        // Nur Win-Sound, wenn kein Comeback und skipSound nicht gesetzt
         playSound('win');
     }
 }
@@ -158,6 +259,35 @@ function updateUI() {
             container.appendChild(item);
         });
     });
+    
+    // Aktualisiere Punktestand-Anzeige
+    updateScoreDifference();
+}
+
+function updateScoreDifference() {
+    const p1Total = getTotalScore(0);
+    const p2Total = getTotalScore(1);
+    const diff = p1Total - p2Total;
+    
+    const p1DiffEl = document.getElementById('p1-score-diff');
+    const p2DiffEl = document.getElementById('p2-score-diff');
+    
+    if (diff > 0) {
+        p1DiffEl.textContent = `+${diff}`;
+        p1DiffEl.setAttribute('data-equal', 'false');
+        p2DiffEl.textContent = `-${diff}`;
+        p2DiffEl.setAttribute('data-equal', 'false');
+    } else if (diff < 0) {
+        p1DiffEl.textContent = `${diff}`;
+        p1DiffEl.setAttribute('data-equal', 'false');
+        p2DiffEl.textContent = `+${Math.abs(diff)}`;
+        p2DiffEl.setAttribute('data-equal', 'false');
+    } else {
+        p1DiffEl.textContent = '=';
+        p1DiffEl.setAttribute('data-equal', 'true');
+        p2DiffEl.textContent = '=';
+        p2DiffEl.setAttribute('data-equal', 'true');
+    }
 }
 
 // Update UI when window is resized to handle mobile/desktop switch
@@ -166,8 +296,25 @@ window.addEventListener('resize', () => {
 });
 
 function updatePlayerNames() {
-    document.getElementById('p1-header').textContent = playerNames[0];
-    document.getElementById('p2-header').textContent = playerNames[1];
+    const p1Header = document.getElementById('p1-header');
+    const p2Header = document.getElementById('p2-header');
+    
+    // Speichere vorhandene Badges
+    const p1Badge = p1Header.querySelector('.comeback-badge');
+    const p2Badge = p2Header.querySelector('.comeback-badge');
+    
+    // Setze Namen
+    p1Header.textContent = playerNames[0];
+    p2Header.textContent = playerNames[1];
+    
+    // Füge Badges wieder hinzu falls vorhanden
+    if (p1Badge && comebackCounts[0] > 0) {
+        p1Header.appendChild(p1Badge);
+    }
+    if (p2Badge && comebackCounts[1] > 0) {
+        p2Header.appendChild(p2Badge);
+    }
+    
     const p1Input = document.getElementById('p1-name-input');
     const p2Input = document.getElementById('p2-name-input');
     if (p1Input) p1Input.value = playerNames[0];
@@ -355,30 +502,6 @@ async function handleSoundUpload(type) {
     }
 }
 
-function testSound(type) {
-    if (soundFiles[type]) {
-        const audio = new Audio(soundFiles[type]);
-        audio.volume = 1.0;
-        audio.play().catch(e => console.error('Sound konnte nicht abgespielt werden:', e));
-        
-        // Nach 5 Sekunden langsam ausfaden
-        setTimeout(() => {
-            const fadeOutInterval = setInterval(() => {
-                if (audio.volume > 0.05) {
-                    audio.volume -= 0.05;
-                } else {
-                    audio.pause();
-                    audio.currentTime = 0;
-                    audio.volume = 1.0;
-                    clearInterval(fadeOutInterval);
-                }
-            }, 50);
-        }, 5000);
-    } else {
-        alert('Bitte lade zuerst eine Sound-Datei hoch!');
-    }
-}
-
 let activeAudioInstances = [];
 
 function playSound(type) {
@@ -393,7 +516,9 @@ function playSound(type) {
         });
         activeAudioInstances = [];
         
-        audio.play().catch(e => console.error('Sound konnte nicht abgespielt werden:', e));
+        audio.play().catch(e => {
+            // Fehler beim Abspielen ignorieren (z.B. wenn Browser blockiert)
+        });
         activeAudioInstances.push(audio);
         
         // Nach 5 Sekunden langsam ausfaden
@@ -414,11 +539,6 @@ function playSound(type) {
             }, 50); // Alle 50ms um 0.05 reduzieren (ca. 1 Sekunde Fade-Out)
         }, 5000);
     }
-}
-
-function loadSounds() {
-    // Sounds werden jetzt aus der Datenbank geladen, nicht mehr aus localStorage
-    // Diese Funktion wird von loadGameData aufgerufen
 }
 
 function displaySounds() {
