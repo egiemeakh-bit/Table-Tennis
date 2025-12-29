@@ -24,11 +24,40 @@ let comebackTracking = {
 }; // Tracking für Comeback über Promotionen hinweg
 
 // Score Management
+// In app.js
+
 function modifyScore(playerIndex, change) {
     if (change > 0) addWin(playerIndex, 0);
     else removeWin(playerIndex);
+    
     updateUI();
     saveData();
+
+    // --- NEU: KI KOMMENTATOR TRIGGER ---
+    // Wir ermitteln den Event-Typ
+    let eventType = 'point';
+    
+    // Prüfen auf Sieg (Sonderlogik, hier vereinfacht, musst du an deine Win-Logic anpassen)
+    // Da deine Logik komplex ist, rufen wir es einfach am Ende auf.
+    
+    // Daten sammeln
+    const p1Name = playerNames[0];
+    const p2Name = playerNames[1];
+    const p1Score = players[0].scores.reduce((a, b) => a + b, 0); // Gesamtscore als Beispiel
+    const p2Score = players[1].scores.reduce((a, b) => a + b, 0);
+
+    // Hier eine kurze Verzögerung, damit der Soundeffekt (Klick) nicht überlappt
+    setTimeout(() => {
+        // Falls du Infos hast, wer gerade gepunktet hat, hier einbauen
+        // Beispiel: eventType 'point', 'win' oder 'promoted'
+        commentator.onScoreChange(
+            players[0].scores.reduce((a,b) => a+b, 0), 
+            players[1].scores.reduce((a,b) => a+b, 0), 
+            playerNames[0], 
+            playerNames[1], 
+            'point'
+        );
+    }, 500);
 }
 
 function getTotalScore(pIdx) {
@@ -502,6 +531,30 @@ async function handleSoundUpload(type) {
     }
 }
 
+function testSound(type) {
+    if (soundFiles[type]) {
+        const audio = new Audio(soundFiles[type]);
+        audio.volume = 1.0;
+        audio.play().catch(e => console.error('Sound konnte nicht abgespielt werden:', e));
+        
+        // Nach 5 Sekunden langsam ausfaden
+        setTimeout(() => {
+            const fadeOutInterval = setInterval(() => {
+                if (audio.volume > 0.05) {
+                    audio.volume -= 0.05;
+                } else {
+                    audio.pause();
+                    audio.currentTime = 0;
+                    audio.volume = 1.0;
+                    clearInterval(fadeOutInterval);
+                }
+            }, 50);
+        }, 5000);
+    } else {
+        alert('Bitte lade zuerst eine Sound-Datei hoch!');
+    }
+}
+
 let activeAudioInstances = [];
 
 function playSound(type) {
@@ -541,6 +594,11 @@ function playSound(type) {
     }
 }
 
+function loadSounds() {
+    // Sounds werden jetzt aus der Datenbank geladen, nicht mehr aus localStorage
+    // Diese Funktion wird von loadGameData aufgerufen
+}
+
 function displaySounds() {
     ['win', 'promoted', 'comeback'].forEach(type => {
         if (soundFiles[type]) {
@@ -570,3 +628,4 @@ window.addEventListener('DOMContentLoaded', () => {
     // Load data (Sounds werden in loadGameData geladen)
     loadData();
 });
+

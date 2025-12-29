@@ -48,3 +48,4 @@ CREATE POLICY "Allow public access" ON games
     FOR ALL
     USING (true)
     WITH CHECK (true);
+

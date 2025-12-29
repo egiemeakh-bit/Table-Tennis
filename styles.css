@@ -809,3 +809,81 @@ body.light-mode .btn-plus {
         box-shadow: 0 4px 20px 0 rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.6);
     }
 }
+
+
+
+/* Apple Intelligence Orb */
+.ai-orb-container {
+    position: fixed;
+    bottom: 25px;
+    right: 25px;
+    z-index: 2000;
+}
+
+.ai-orb {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: #000;
+    position: relative;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    /* Der äußere Schein (Aura) */
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
+}
+
+/* Die leuchtende Aura (Apple Intelligence Look) */
+.ai-orb::after {
+    content: '';
+    position: absolute;
+    inset: -4px;
+    border-radius: 50%;
+    padding: 4px;
+    background: linear-gradient(135deg, #5efce8, #736efe, #ff6a88, #d4fc79);
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    opacity: 0.5;
+    transition: opacity 0.4s ease;
+}
+
+/* Der innere pulsierende Mesh-Kern */
+.orb-visualizer {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: radial-gradient(circle at 30% 30%, #5efce8, transparent),
+                radial-gradient(circle at 70% 70%, #736efe, transparent),
+                radial-gradient(circle at 50% 50%, #ff6a88, transparent);
+    filter: blur(8px);
+    opacity: 0.6;
+    transition: all 0.4s ease;
+}
+
+/* Status: Denken (Rotierender Rand) */
+.ai-orb.thinking::after {
+    opacity: 1;
+    animation: apple-rotate 1.5s linear infinite;
+}
+
+/* Status: Sprechen (Starkes Pulsieren) */
+.ai-orb.speaking .orb-visualizer {
+    opacity: 1;
+    filter: blur(4px);
+    animation: apple-vibrate 0.4s ease-in-out infinite alternate;
+}
+
+@keyframes apple-rotate {
+    0% { transform: rotate(0deg); filter: hue-rotate(0deg); }
+    100% { transform: rotate(360deg); filter: hue-rotate(360deg); }
+}
+
+@keyframes apple-vibrate {
+    from { transform: scale(0.85); opacity: 0.7; }
+    to { transform: scale(1.15); opacity: 1; }
+}
+
+.ai-orb.muted { filter: grayscale(1) brightness(0.5); }

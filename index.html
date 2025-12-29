@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Liquid League Tracker (Fixed Colors)</title>
     <link rel="stylesheet" href="styles.css">
+    <script src="https://js.puter.com/v2/"></script>
 </head>
 <body>
 
@@ -159,8 +160,47 @@
         </div>
     </div>
 
+    <!-- AI Orb and Settings Popup -->
+    <div id="ai-orb-container" class="ai-orb-container">
+        <div class="ai-orb" onclick="toggleAISettings()">
+            <div class="orb-visualizer">
+                <span></span><span></span><span></span>
+            </div>
+        </div>
+    </div>
+    
+    <div id="ai-settings-popup" class="popup-overlay" style="display: none;">
+        <div class="popup-content">
+            <div class="popup-title">KI Kommentator</div>
+            
+            <div class="settings-group">
+                <label>Status</label>
+                <button id="ai-mute-btn" class="popup-btn" onclick="toggleAIMute()">
+                    Stummschalten
+                </button>
+            </div>
+    
+            <div class="settings-group">
+                <label>Persönlichkeit</label>
+                <select id="ai-personality" class="popup-input">
+                    <option value="hyped">Hype-Kommentator (Fussball Style)</option>
+                    <option value="analytical">Analytischer Experte</option>
+                    <option value="roast">Sarkastisch / Roast</option>
+                </select>
+            </div>
+    
+            <div class="settings-group">
+                <label style="font-size: 0.8rem; color: #888;">Google Gemini API Key (für Texte)</label>
+                <input type="password" id="ai-api-key" class="popup-input" placeholder="Hier API Key einfügen...">
+            </div>
+    
+            <button class="popup-btn" onclick="closeAISettings()">Schließen</button>
+        </div>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="database.js"></script>
+    <script src="commentator.js"></script>
     <script src="app.js"></script>
 </body>
 </html>
