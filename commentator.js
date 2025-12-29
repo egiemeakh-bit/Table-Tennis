@@ -1,91 +1,166 @@
+/**
+ * AI Commentator for Table Tennis Liquid
+ * Powered by Puter.js
+ */
+
 class AICommentator {
     constructor() {
         this.isMuted = false;
         this.isSpeaking = false;
-        this.mode = localStorage.getItem('ai_mode') || 'professional'; // professional oder trash
+        this.lastCommentTime = 0;
+        this.mode = localStorage.getItem('ai_personality') || 'professional'; 
 
-        // UI für Modus-Switch in Settings einfügen
-        this.initSettings();
+        this.initUI();
     }
 
-    initSettings() {
-        // Versteckt API-Feld und fügt Modus-Buttons hinzu
+    initUI() {
+        // Blende das API-Feld aus und style die Modus-Buttons
         const style = document.createElement('style');
-        style.innerHTML = '#ai-api-key-container { display: none !important; } .ai-mode-btn { background: var(--glass-bg); border: 1px solid var(--glass-border); color: white; padding: 10px; border-radius: 10px; cursor: pointer; flex: 1; margin: 5px; } .ai-mode-btn.active { background: white; color: black; }';
+        style.innerHTML = `
+            #ai-api-key-container { display: none !important; }
+            .mode-toggle { display: flex; gap: 10px; margin-top: 10px; margin-bottom: 20px; }
+            .mode-btn { 
+                flex: 1; 
+                padding: 12px; 
+                border-radius: 14px; 
+                border: 1px solid rgba(255,255,255,0.1); 
+                background: rgba(255,255,255,0.05); 
+                color: white; 
+                cursor: pointer;
+                font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif;
+                font-weight: 500;
+                transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            }
+            .mode-btn.active { 
+                background: white; 
+                color: black; 
+                box-shadow: 0 4px 20px rgba(255,255,255,0.4);
+                transform: scale(1.02);
+            }
+        `;
         document.head.appendChild(style);
 
+        // Sicherer UI-Einschub
         setTimeout(() => {
-            const popup = document.querySelector('#ai-settings-popup .popup-content');
-            if (popup) {
-                const modeContainer = document.createElement('div');
-                modeContainer.innerHTML = `
-                    <label style="display:block; margin-top:15px;">KI Persönlichkeit</label>
-                    <div style="display:flex;">
-                        <button class="ai-mode-btn ${this.mode==='professional'?'active':''}" onclick="commentator.setMode('professional')">Professionell</button>
-                        <button class="ai-mode-btn ${this.mode==='trash'?'active':''}" onclick="commentator.setMode('trash')">Trash Talk</button>
+            const popupContent = document.querySelector('#ai-settings-popup .popup-content');
+            if (popupContent) {
+                // Wir erstellen eine Sektion für die Persönlichkeit
+                const modeSection = document.createElement('div');
+                modeSection.className = 'settings-group';
+                modeSection.style.marginTop = '20px';
+                modeSection.innerHTML = `
+                    <label style="display:block; margin-bottom:8px; font-size:0.75rem; color:rgba(255,255,255,0.4); text-transform:uppercase; letter-spacing:1px;">KI Charakter</label>
+                    <div class="mode-toggle">
+                        <button id="mode-pro" class="mode-btn ${this.mode === 'professional' ? 'active' : ''}" onclick="commentator.setMode('professional')">Pro</button>
+                        <button id="mode-trash" class="mode-btn ${this.mode === 'trash' ? 'active' : ''}" onclick="commentator.setMode('trash')">Trash Talk</button>
                     </div>
                 `;
-                popup.insertBefore(modeContainer, popup.querySelector('button'));
+                
+                // Wir hängen es einfach VOR dem letzten Button (Schließen) an
+                const closeBtn = popupContent.querySelector('button:last-of-type');
+                if (closeBtn) {
+                    popupContent.insertBefore(modeSection, closeBtn);
+                } else {
+                    popupContent.appendChild(modeSection);
+                }
             }
-        }, 500);
+        }, 1000);
     }
 
     setMode(m) {
         this.mode = m;
-        localStorage.setItem('ai_mode', m);
-        document.querySelectorAll('.ai-mode-btn').forEach(b => b.classList.remove('active'));
-        event.target.classList.add('active');
+        localStorage.setItem('ai_personality', m);
+        document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+        const activeBtn = document.getElementById(m === 'professional' ? 'mode-pro' : 'mode-trash');
+        if (activeBtn) activeBtn.classList.add('active');
     }
 
-    async onScoreChange(p1S, p2S, p1N, p2N, eventType, extraInfo = {}) {
+    async onScoreChange(p1Scores, p2Scores, p1Name, p2Name, eventType) {
         if (this.isMuted || this.isSpeaking) return;
-        this.setUI('thinking');
 
-        // Die KI erhält das volle Wissen über die Spielmechanik
+        const now = Date.now();
+        if (now - this.lastCommentTime < 4000) return;
+        this.lastCommentTime = now;
+
+        this.setUIState('thinking');
+
+        // Umfassender Kontext für die KI (Liquid Glass Deep Logic)
         const context = `
-        REGELN: 4 Ligen (Bronze, Silber, Gold, Platin). Bei Aufstieg werden alle Pkt darunter auf 0 gesetzt.
-        SPIELSTAND:
-        ${p1N}: Bronze(${p1S[0]}), Silber(${p1S[1]}), Gold(${p1S[2]}), Platin(${p1S[3]})
-        ${p2N}: Bronze(${p2S[0]}), Silber(${p2S[1]}), Gold(${p2S[2]}), Platin(${p2S[3]})
-        EREIGNIS: ${eventType} (z.B. Punkt, Aufstieg, Comeback).
-        PERSÖNLICHKEIT: ${this.mode === 'trash' ? 'Extremer Trash-Talk, sarkastisch, beleidigt den Verlierer leicht' : 'Professioneller TV-Kommentator, sachlich aber begeistert'}.
-        AUFGABE: 2 Sätze Kommentar auf Deutsch.
+        Rolle: Live-Kommentator für Tischtennis.
+        Charakter: ${this.mode === 'trash' ? 'Extremer Trash-Talk, sarkastisch, beleidigt Verlierer leicht, feiert Fehler.' : 'Professionell, hochemotional, wie ein TV-Profi.'}
+        
+        Spielstand-Daten:
+        - ${p1Name}: [B:${p1Scores[0]}, S:${p1Scores[1]}, G:${p1Scores[2]}, P:${p1Scores[3]}]
+        - ${p2Name}: [B:${p2Scores[0]}, S:${p2Scores[1]}, G:${p2Scores[2]}, P:${p2Scores[3]}]
+        
+        Event: ${eventType}. 
+        HINWEIS: Wenn Scores einer Liga auf 0 sinken, gab es einen Aufstieg in die Liga darüber!
+        
+        Anweisung: Schreib 2 kurze, knackige Sätze auf Deutsch. Antworte NUR mit dem Sprechtext.
         `;
 
         try {
             const response = await puter.ai.chat(context);
-            this.speak(response.toString());
-        } catch (e) {
-            console.error("AI Error", e);
-            this.setUI('idle');
+            const text = response.toString().trim();
+            if (text) this.speak(text);
+        } catch (error) {
+            console.error("Puter Error:", error);
+            this.setUIState('idle');
         }
     }
 
     speak(text) {
         window.speechSynthesis.cancel();
-        this.setUI('speaking');
+        this.setUIState('speaking');
         this.isSpeaking = true;
+
         const ut = new SpeechSynthesisUtterance(text);
         ut.lang = 'de-DE';
-        ut.rate = 1.1;
+        ut.rate = 1.1; 
+        
         const voices = window.speechSynthesis.getVoices();
-        ut.voice = voices.find(v => v.name.includes("Google") && v.lang.includes("de")) || voices.find(v => v.lang.includes("de"));
-        ut.onend = () => { this.setUI('idle'); this.isSpeaking = false; };
+        ut.voice = voices.find(v => v.name.includes('Google') && v.lang.includes('de')) || 
+                   voices.find(v => v.lang.includes('de'));
+
+        ut.onend = () => {
+            this.setUIState('idle');
+            this.isSpeaking = false;
+        };
+
         window.speechSynthesis.speak(ut);
     }
 
-    setUI(state) {
-        const orb = document.querySelector('.ai-orb');
-        if (orb) {
-            orb.classList.remove('thinking', 'speaking');
-            if (state !== 'idle') orb.classList.add(state);
-        }
+    setUIState(state) {
+        const orb = document.getElementById('ai-orb');
+        if (!orb) return;
+        orb.classList.remove('thinking', 'speaking');
+        if (state !== 'idle') orb.classList.add(state);
     }
 
     toggleMute() {
         this.isMuted = !this.isMuted;
-        document.querySelector('.ai-orb').classList.toggle('muted', this.isMuted);
+        const orb = document.getElementById('ai-orb');
+        const muteBtn = document.getElementById('ai-mute-btn');
+        if (orb) orb.classList.toggle('muted', this.isMuted);
+        if (muteBtn) muteBtn.innerText = this.isMuted ? "KI Aktivieren" : "Stummschalten";
+        if (this.isMuted) window.speechSynthesis.cancel();
     }
 }
 
+// Instanz
 const commentator = new AICommentator();
+
+// Globale Fenster-Funktionen (Apple Style)
+window.toggleAISettings = () => {
+    const p = document.getElementById('ai-settings-popup');
+    if (p) p.style.display = (p.style.display === 'none') ? 'flex' : 'none';
+};
+
+window.closeAISettings = () => {
+    const p = document.getElementById('ai-settings-popup');
+    if (p) p.style.display = 'none';
+};
+
+window.toggleAIMute = () => {
+    commentator.toggleMute();
+};

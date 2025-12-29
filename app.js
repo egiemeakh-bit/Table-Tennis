@@ -51,11 +51,11 @@ function modifyScore(playerIndex, change) {
         // Falls du Infos hast, wer gerade gepunktet hat, hier einbauen
         // Beispiel: eventType 'point', 'win' oder 'promoted'
         commentator.onScoreChange(
-            players[0].scores, // Das komplette Array [B, S, G, P]
-            players[1].scores, // Das komplette Array [B, S, G, P]
-            playerNames[0],
-            playerNames[1],
-            'Score Update'
+            players[0].scores, // Übergibt das Array [0,0,0,0]
+            players[1].scores, 
+            playerNames[0], 
+            playerNames[1], 
+            change > 0 ? "Punktgewinn" : "Punktabzug"
         );
     }, 500);
 }

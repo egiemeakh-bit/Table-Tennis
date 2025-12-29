@@ -812,78 +812,87 @@ body.light-mode .btn-plus {
 
 
 
-/* Apple Intelligence Orb */
 .ai-orb-container {
     position: fixed;
-    bottom: 25px;
-    right: 25px;
-    z-index: 2000;
+    bottom: 30px;
+    right: 30px;
+    z-index: 9999;
 }
 
 .ai-orb {
     width: 60px;
     height: 60px;
     border-radius: 50%;
-    background: #000;
+    background: rgba(10, 10, 10, 0.6);
     position: relative;
     cursor: pointer;
+    backdrop-filter: blur(15px) saturate(180%);
+    -webkit-backdrop-filter: blur(15px) saturate(180%);
+    border: 0.5px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
     display: flex;
     justify-content: center;
     align-items: center;
-    /* Der äußere Schein (Aura) */
-    box-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
 }
 
-/* Die leuchtende Aura (Apple Intelligence Look) */
-.ai-orb::after {
+/* Die Apple Intelligence Aura hinter dem Glas */
+.ai-orb::before {
     content: '';
     position: absolute;
-    inset: -4px;
+    inset: -8px;
     border-radius: 50%;
-    padding: 4px;
-    background: linear-gradient(135deg, #5efce8, #736efe, #ff6a88, #d4fc79);
-    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-    -webkit-mask-composite: xor;
-    mask-composite: exclude;
-    opacity: 0.5;
+    background: linear-gradient(135deg, #00f2ff, #7000ff, #ff007b, #fbff00);
+    background-size: 400% 400%;
+    z-index: -1;
+    opacity: 0;
+    filter: blur(15px);
     transition: opacity 0.4s ease;
 }
 
-/* Der innere pulsierende Mesh-Kern */
 .orb-visualizer {
-    width: 100%;
-    height: 100%;
+    width: 75%;
+    height: 75%;
     border-radius: 50%;
-    background: radial-gradient(circle at 30% 30%, #5efce8, transparent),
-                radial-gradient(circle at 70% 70%, #736efe, transparent),
-                radial-gradient(circle at 50% 50%, #ff6a88, transparent);
-    filter: blur(8px);
-    opacity: 0.6;
-    transition: all 0.4s ease;
+    overflow: hidden;
+    background: #000;
+    position: relative;
 }
 
-/* Status: Denken (Rotierender Rand) */
-.ai-orb.thinking::after {
-    opacity: 1;
-    animation: apple-rotate 1.5s linear infinite;
+.orb-visualizer::after {
+    content: '';
+    position: absolute;
+    inset: -100%;
+    background-image: 
+        radial-gradient(at 0% 0%, #5efce8 0, transparent 55%), 
+        radial-gradient(at 100% 0%, #736efe 0, transparent 55%), 
+        radial-gradient(at 50% 100%, #ff6a88 0, transparent 55%),
+        radial-gradient(at 100% 100%, #d4fc79 0, transparent 55%);
+    filter: blur(10px) brightness(1.2);
+    opacity: 0.4;
 }
 
-/* Status: Sprechen (Starkes Pulsieren) */
-.ai-orb.speaking .orb-visualizer {
+/* Animationen */
+.ai-orb.thinking::before { opacity: 0.8; animation: apple-rotate 2s linear infinite; }
+.ai-orb.thinking .orb-visualizer::after { animation: liquid-mesh 4s ease infinite alternate; }
+
+.ai-orb.speaking .orb-visualizer::after {
     opacity: 1;
-    filter: blur(4px);
-    animation: apple-vibrate 0.4s ease-in-out infinite alternate;
+    animation: liquid-vibrate 0.25s ease-in-out infinite alternate;
 }
 
 @keyframes apple-rotate {
-    0% { transform: rotate(0deg); filter: hue-rotate(0deg); }
-    100% { transform: rotate(360deg); filter: hue-rotate(360deg); }
+    0% { background-position: 0% 50%; transform: rotate(0deg); }
+    100% { background-position: 100% 50%; transform: rotate(360deg); }
 }
 
-@keyframes apple-vibrate {
-    from { transform: scale(0.85); opacity: 0.7; }
-    to { transform: scale(1.15); opacity: 1; }
+@keyframes liquid-mesh {
+    0% { transform: scale(1) translate(-10%, -10%); }
+    100% { transform: scale(1.5) translate(10%, 10%); }
 }
 
-.ai-orb.muted { filter: grayscale(1) brightness(0.5); }
+@keyframes liquid-vibrate {
+    from { transform: scale(1.1); filter: blur(8px) brightness(1.6); }
+    to { transform: scale(1.3); filter: blur(5px) brightness(1.9); }
+}
+
+.ai-orb.muted { filter: grayscale(1); opacity: 0.4; }

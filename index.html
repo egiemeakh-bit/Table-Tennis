@@ -169,32 +169,39 @@
         </div>
     </div>
     
+    <div class="ai-orb-container">
+        <div class="ai-orb" id="ai-orb" onclick="toggleAISettings()">
+            <div class="orb-visualizer">
+                </div>
+        </div>
+    </div>
+    
     <div id="ai-settings-popup" class="popup-overlay" style="display: none;">
         <div class="popup-content">
             <div class="popup-title">KI Kommentator</div>
             
             <div class="settings-group">
-                <label>Status</label>
+                <label>Sprachausgabe</label>
                 <button id="ai-mute-btn" class="popup-btn" onclick="toggleAIMute()">
-                    Stummschalten
+                    Stummschalten / Aktivieren
                 </button>
             </div>
     
-            <div class="settings-group">
+            <div class="settings-group" id="ai-mode-container">
                 <label>Persönlichkeit</label>
-                <select id="ai-personality" class="popup-input">
-                    <option value="hyped">Hype-Kommentator (Fussball Style)</option>
-                    <option value="analytical">Analytischer Experte</option>
-                    <option value="roast">Sarkastisch / Roast</option>
-                </select>
+                <div class="mode-toggle" style="display: flex; gap: 10px; margin-top: 10px;">
+                    <button id="mode-pro" class="mode-btn active" onclick="commentator.setMode('professional')">Professionell</button>
+                    <button id="mode-trash" class="mode-btn" onclick="commentator.setMode('trash')">Trash Talk</button>
+                </div>
             </div>
     
-            <div class="settings-group">
-                <label style="font-size: 0.8rem; color: #888;">Google Gemini API Key (für Texte)</label>
-                <input type="password" id="ai-api-key" class="popup-input" placeholder="Hier API Key einfügen...">
+            <div class="settings-group" id="ai-api-key-container" style="opacity: 0.5;">
+                <label>System-Status</label>
+                <input type="text" id="ai-api-key" class="popup-input" value="Puter.js Active" readonly>
+                <small style="font-size: 0.7rem; color: var(--text-secondary);">KI läuft über Cloud-Infrastruktur (kein Key nötig).</small>
             </div>
     
-            <button class="popup-btn" onclick="closeAISettings()">Schließen</button>
+            <button class="popup-btn" onclick="closeAISettings()" style="margin-top: 20px; background: white; color: black;">Fertig</button>
         </div>
     </div>
 
