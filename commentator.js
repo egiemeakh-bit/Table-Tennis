@@ -1,6 +1,6 @@
 /**
  * AI Commentator for Table Tennis Liquid
- * Powered by Puter.js
+ * High-End "Liquid Glass" Design & Deep Game Logic
  */
 
 class AICommentator {
@@ -9,42 +9,37 @@ class AICommentator {
         this.isSpeaking = false;
         this.lastCommentTime = 0;
         this.mode = localStorage.getItem('ai_personality') || 'professional'; 
+        
+        // Historie-Speicher für den Vergleich
+        this.lastState = {
+            p1Scores: [0, 0, 0, 0],
+            p2Scores: [0, 0, 0, 0]
+        };
 
         this.initUI();
     }
 
     initUI() {
-        // Blende das API-Feld aus und style die Modus-Buttons
         const style = document.createElement('style');
         style.innerHTML = `
             #ai-api-key-container { display: none !important; }
             .mode-toggle { display: flex; gap: 10px; margin-top: 10px; margin-bottom: 20px; }
             .mode-btn { 
-                flex: 1; 
-                padding: 12px; 
-                border-radius: 14px; 
-                border: 1px solid rgba(255,255,255,0.1); 
-                background: rgba(255,255,255,0.05); 
-                color: white; 
-                cursor: pointer;
+                flex: 1; padding: 12px; border-radius: 14px; border: 1px solid rgba(255,255,255,0.1); 
+                background: rgba(255,255,255,0.05); color: white; cursor: pointer;
                 font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif;
-                font-weight: 500;
-                transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                font-weight: 500; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             }
             .mode-btn.active { 
-                background: white; 
-                color: black; 
-                box-shadow: 0 4px 20px rgba(255,255,255,0.4);
+                background: white; color: black; box-shadow: 0 4px 20px rgba(255,255,255,0.4);
                 transform: scale(1.02);
             }
         `;
         document.head.appendChild(style);
 
-        // Sicherer UI-Einschub
         setTimeout(() => {
             const popupContent = document.querySelector('#ai-settings-popup .popup-content');
             if (popupContent) {
-                // Wir erstellen eine Sektion für die Persönlichkeit
                 const modeSection = document.createElement('div');
                 modeSection.className = 'settings-group';
                 modeSection.style.marginTop = '20px';
@@ -55,14 +50,9 @@ class AICommentator {
                         <button id="mode-trash" class="mode-btn ${this.mode === 'trash' ? 'active' : ''}" onclick="commentator.setMode('trash')">Trash Talk</button>
                     </div>
                 `;
-                
-                // Wir hängen es einfach VOR dem letzten Button (Schließen) an
                 const closeBtn = popupContent.querySelector('button:last-of-type');
-                if (closeBtn) {
-                    popupContent.insertBefore(modeSection, closeBtn);
-                } else {
-                    popupContent.appendChild(modeSection);
-                }
+                if (closeBtn) popupContent.insertBefore(modeSection, closeBtn);
+                else popupContent.appendChild(modeSection);
             }
         }, 1000);
     }
@@ -78,26 +68,39 @@ class AICommentator {
     async onScoreChange(p1Scores, p2Scores, p1Name, p2Name, eventType) {
         if (this.isMuted || this.isSpeaking) return;
 
+        // Wer hat den Punkt gemacht? Vergleich mit Historie
+        let actionDescription = eventType;
+        if (JSON.stringify(p1Scores) !== JSON.stringify(this.lastState.p1Scores)) {
+            actionDescription = `${p1Name} hat gepunktet/sich verändert.`;
+        } else if (JSON.stringify(p2Scores) !== JSON.stringify(this.lastState.p2Scores)) {
+            actionDescription = `${p2Name} hat gepunktet/sich verändert.`;
+        }
+
         const now = Date.now();
-        if (now - this.lastCommentTime < 4000) return;
+        if (now - this.lastCommentTime < 4500) return;
         this.lastCommentTime = now;
 
         this.setUIState('thinking');
 
-        // Umfassender Kontext für die KI (Liquid Glass Deep Logic)
         const context = `
         Rolle: Live-Kommentator für Tischtennis.
-        Charakter: ${this.mode === 'trash' ? 'Extremer Trash-Talk, sarkastisch, beleidigt Verlierer Stark, feiert Fehler, Modernes Sprachgebrauch.' : 'Professionell, hochemotional, wie ein TV-Profi.'}
+        Charakter: ${this.mode === 'trash' ? 'Extremer Trash-Talk, sarkastisch, fies.' : 'Professionell, hochemotional.'}
         
-        Spielstand-Daten:
-        - ${p1Name}: [B(Bronze):${p1Scores[0]}, S(Silber):${p1Scores[1]}, G(Gold):${p1Scores[2]}, P(Platin):${p1Scores[3]}]
-        - ${p2Name}: [B(Bronze):${p2Scores[0]}, S(Silber):${p2Scores[1]}, G(Gold):${p2Scores[2]}, P(Platin):${p2Scores[3]}]
+        HISTORIE (Vorher): 
+        ${p1Name}: [${this.lastState.p1Scores.join(',')}] | ${p2Name}: [${this.lastState.p2Scores.join(',')}]
         
-        Event: ${eventType}. 
-        HINWEIS: Wenn Scores einer Liga auf 0 sinken, gab es einen Aufstieg in die Liga darüber!
+        AKTUELL (Jetzt):
+        ${p1Name}: [${p1Scores.join(',')}] | ${p2Name}: [${p2Scores.join(',')}]
         
-        Anweisung: Schreib 2 kurze, knackige Sätze auf Deutsch. Antworte NUR mit dem Sprechtext.
+        AKTION: ${actionDescription}
+        
+        Info: Ligen sind Bronze, Silber, Gold, Platin. Wenn eine Liga auf 0 geht, ist der Spieler aufgestiegen!
+        Aufgabe: Schreib 2 kurze Sätze auf Deutsch. Antworte NUR mit Sprechtext.
         `;
+
+        // Update Historie für das nächste Mal
+        this.lastState.p1Scores = [...p1Scores];
+        this.lastState.p2Scores = [...p2Scores];
 
         try {
             const response = await puter.ai.chat(context);
@@ -126,7 +129,6 @@ class AICommentator {
             this.setUIState('idle');
             this.isSpeaking = false;
         };
-
         window.speechSynthesis.speak(ut);
     }
 
@@ -147,20 +149,14 @@ class AICommentator {
     }
 }
 
-// Instanz
 const commentator = new AICommentator();
 
-// Globale Fenster-Funktionen (Apple Style)
 window.toggleAISettings = () => {
     const p = document.getElementById('ai-settings-popup');
     if (p) p.style.display = (p.style.display === 'none') ? 'flex' : 'none';
 };
-
 window.closeAISettings = () => {
     const p = document.getElementById('ai-settings-popup');
     if (p) p.style.display = 'none';
 };
-
-window.toggleAIMute = () => {
-    commentator.toggleMute();
-};
+window.toggleAIMute = () => commentator.toggleMute();
