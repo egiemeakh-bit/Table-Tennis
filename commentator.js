@@ -90,8 +90,8 @@ class AICommentator {
         Charakter: ${this.mode === 'trash' ? 'Extremer Trash-Talk, sarkastisch, beleidigt Verlierer leicht, feiert Fehler.' : 'Professionell, hochemotional, wie ein TV-Profi.'}
         
         Spielstand-Daten:
-        - ${p1Name}: [B:${p1Scores[0]}, S:${p1Scores[1]}, G:${p1Scores[2]}, P:${p1Scores[3]}]
-        - ${p2Name}: [B:${p2Scores[0]}, S:${p2Scores[1]}, G:${p2Scores[2]}, P:${p2Scores[3]}]
+        - ${p1Name}: [B(Bronze):${p1Scores[0]}, S(Silber):${p1Scores[1]}, G(Gold):${p1Scores[2]}, P(Platin):${p1Scores[3]}]
+        - ${p2Name}: [B(Bronze):${p2Scores[0]}, S(Silber):${p2Scores[1]}, G(Gold):${p2Scores[2]}, P(Platin):${p2Scores[3]}]
         
         Event: ${eventType}. 
         HINWEIS: Wenn Scores einer Liga auf 0 sinken, gab es einen Aufstieg in die Liga darüber!
