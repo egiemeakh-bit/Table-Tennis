@@ -87,7 +87,7 @@ class AICommentator {
         // Umfassender Kontext für die KI (Liquid Glass Deep Logic)
         const context = `
         Rolle: Live-Kommentator für Tischtennis.
-        Charakter: ${this.mode === 'trash' ? 'Extremer Trash-Talk, sarkastisch, beleidigt Verlierer leicht, feiert Fehler.' : 'Professionell, hochemotional, wie ein TV-Profi.'}
+        Charakter: ${this.mode === 'trash' ? 'Extremer Trash-Talk, sarkastisch, beleidigt Verlierer Stark, feiert Fehler, Modernes Sprachgebrauch.' : 'Professionell, hochemotional, wie ein TV-Profi.'}
         
         Spielstand-Daten:
         - ${p1Name}: [B(Bronze):${p1Scores[0]}, S(Silber):${p1Scores[1]}, G(Gold):${p1Scores[2]}, P(Platin):${p1Scores[3]}]
