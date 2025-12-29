@@ -4,67 +4,65 @@ class AICommentator {
         this.isSpeaking = false;
         this.lastCommentTime = 0;
 
-        // UI-Check: Wir entfernen das manuelle API-Feld, da Puter keinen Key braucht
-        const hideInterval = setInterval(() => {
-            const apiField = document.getElementById('ai-api-key');
-            if (apiField) {
-                apiField.closest('.settings-group').style.display = 'none';
-                clearInterval(hideInterval);
-            }
-        }, 100);
+        // Sofortiges Ausblenden der API-Einstellungen
+        const style = document.createElement('style');
+        style.innerHTML = '#ai-api-key-container, .settings-group:has(#ai-api-key) { display: none !important; }';
+        document.head.appendChild(style);
     }
 
     async onScoreChange(p1S, p2S, p1N, p2N, type) {
         if (this.isMuted || this.isSpeaking) return;
         
-        // Cooldown 4 Sek.
-        if (Date.now() - this.lastCommentTime < 4000) return;
+        // Cooldown auf 3 Sek reduziert für mehr Action
+        if (Date.now() - this.lastCommentTime < 3000) return;
         this.lastCommentTime = Date.now();
 
         this.setUI('thinking');
 
-        const prompt = `Du bist ein leidenschaftlicher Tischtennis-Moderator. 
-        Stand: ${p1N} (${p1S}) gegen ${p2N} (${p2S}). Ereignis: ${type}.
-        Schreibe einen mitreißenden, professionellen Live-Kommentar (3-4 Sätze). 
-        Analysiere kurz die Stimmung. Nutze keine Emojis. Sprache: Deutsch.`;
+        // Wir halten den Prompt extrem kurz, das beschleunigt die Generierung massiv
+        const shortPrompt = `Moderator: ${p1N} ${p1S} pkt, ${p2N} ${p2S} pkt. Event: ${type}. Kurz & emotional, max 2 Sätze. Deutsch.`;
 
         try {
-            // Puter.js AI Call - Kein API Key nötig!
-            const response = await puter.ai.chat(prompt);
-            const text = response.toString();
+            // Wir nutzen puter.ai.chat mit einer niedrigen Wortzahl-Vorgabe (implizit durch Prompt)
+            // Puter wählt automatisch das schnellste verfügbare Modell
+            const response = await puter.ai.chat(shortPrompt);
+            const text = response.toString().trim();
             
             if (text) {
                 this.speak(text);
-            } else {
-                throw new Error("Empty response");
             }
         } catch (e) {
-            console.error("Puter AI Error:", e);
-            this.setUI('idle');
-            // Bei Puter-Fehlern versuchen wir es nach 2 Sek erneut
-            setTimeout(() => this.onScoreChange(p1S, p2S, p1N, p2N, type), 2000);
+            console.error("Speed Error:", e);
+            // Bei Fehler sofortiger Retry ohne Verzögerung
+            this.onScoreChange(p1S, p2S, p1N, p2N, type);
         }
     }
 
     speak(text) {
+        // Falls noch was im Puffer ist, sofort löschen
         window.speechSynthesis.cancel();
+        
         this.setUI('speaking');
         this.isSpeaking = true;
 
-        const utterance = new SpeechSynthesisUtterance(text);
-        utterance.lang = 'de-DE';
-        utterance.rate = 1.05;
+        const ut = new SpeechSynthesisUtterance(text);
+        ut.lang = 'de-DE';
+        
+        // Etwas schnelleres Sprechen wirkt "aufgeregter" und moderner
+        ut.rate = 1.15; 
+        ut.pitch = 1.0;
         
         const voices = window.speechSynthesis.getVoices();
-        // Bevorzugt Google Deutsch oder eine beliebige deutsche Stimme
-        utterance.voice = voices.find(v => v.name.includes("Google") && v.lang.includes("de")) || 
-                          voices.find(v => v.lang.includes("de"));
+        // Google Stimmen sind meist schneller in der Initialisierung
+        ut.voice = voices.find(v => v.name.includes("Google") && v.lang.includes("de")) || 
+                   voices.find(v => v.lang.includes("de"));
 
-        utterance.onend = () => {
+        ut.onend = () => {
             this.setUI('idle');
             this.isSpeaking = false;
         };
-        window.speechSynthesis.speak(utterance);
+        
+        window.speechSynthesis.speak(ut);
     }
 
     setUI(state) {
@@ -82,8 +80,3 @@ class AICommentator {
 }
 
 const commentator = new AICommentator();
-
-// Globale Handler für Buttons
-window.toggleAISettings = () => document.getElementById('ai-settings-popup').style.display = 'flex';
-window.closeAISettings = () => document.getElementById('ai-settings-popup').style.display = 'none';
-window.toggleAIMute = () => commentator.toggleMute();
