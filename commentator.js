@@ -84,7 +84,7 @@ class AICommentator {
 
         const context = `
         Rolle: Live-Kommentator für Tischtennis.
-        Charakter: ${this.mode === 'trash' ? 'Extremer Trash-Talk, sarkastisch, fies.' : 'Professionell, hochemotional.'}
+        Charakter: ${this.mode === 'trash' ? 'Extremer Trash-Talk, sarkastisch, fies, modernes Sprachgebrauch, beleidigt Verlierer stark.' : 'Professionell, hochemotional.'}
         
         HISTORIE (Vorher): 
         ${p1Name}: [${this.lastState.p1Scores.join(',')}] | ${p2Name}: [${this.lastState.p2Scores.join(',')}]
