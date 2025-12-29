@@ -2,80 +2,89 @@ class AICommentator {
     constructor() {
         this.isMuted = false;
         this.isSpeaking = false;
-        this.lastCommentTime = 0;
+        this.mode = localStorage.getItem('ai_mode') || 'professional'; // professional oder trash
 
-        // Sofortiges Ausblenden der API-Einstellungen
-        const style = document.createElement('style');
-        style.innerHTML = '#ai-api-key-container, .settings-group:has(#ai-api-key) { display: none !important; }';
-        document.head.appendChild(style);
+        // UI für Modus-Switch in Settings einfügen
+        this.initSettings();
     }
 
-    async onScoreChange(p1S, p2S, p1N, p2N, type) {
-        if (this.isMuted || this.isSpeaking) return;
-        
-        // Cooldown auf 3 Sek reduziert für mehr Action
-        if (Date.now() - this.lastCommentTime < 3000) return;
-        this.lastCommentTime = Date.now();
+    initSettings() {
+        // Versteckt API-Feld und fügt Modus-Buttons hinzu
+        const style = document.createElement('style');
+        style.innerHTML = '#ai-api-key-container { display: none !important; } .ai-mode-btn { background: var(--glass-bg); border: 1px solid var(--glass-border); color: white; padding: 10px; border-radius: 10px; cursor: pointer; flex: 1; margin: 5px; } .ai-mode-btn.active { background: white; color: black; }';
+        document.head.appendChild(style);
 
+        setTimeout(() => {
+            const popup = document.querySelector('#ai-settings-popup .popup-content');
+            if (popup) {
+                const modeContainer = document.createElement('div');
+                modeContainer.innerHTML = `
+                    <label style="display:block; margin-top:15px;">KI Persönlichkeit</label>
+                    <div style="display:flex;">
+                        <button class="ai-mode-btn ${this.mode==='professional'?'active':''}" onclick="commentator.setMode('professional')">Professionell</button>
+                        <button class="ai-mode-btn ${this.mode==='trash'?'active':''}" onclick="commentator.setMode('trash')">Trash Talk</button>
+                    </div>
+                `;
+                popup.insertBefore(modeContainer, popup.querySelector('button'));
+            }
+        }, 500);
+    }
+
+    setMode(m) {
+        this.mode = m;
+        localStorage.setItem('ai_mode', m);
+        document.querySelectorAll('.ai-mode-btn').forEach(b => b.classList.remove('active'));
+        event.target.classList.add('active');
+    }
+
+    async onScoreChange(p1S, p2S, p1N, p2N, eventType, extraInfo = {}) {
+        if (this.isMuted || this.isSpeaking) return;
         this.setUI('thinking');
 
-        // Wir halten den Prompt extrem kurz, das beschleunigt die Generierung massiv
-        const shortPrompt = `Moderator: ${p1N} ${p1S} pkt, ${p2N} ${p2S} pkt. Event: ${type}. Kurz & emotional, max 2 Sätze. Deutsch.`;
+        // Die KI erhält das volle Wissen über die Spielmechanik
+        const context = `
+        REGELN: 4 Ligen (Bronze, Silber, Gold, Platin). Bei Aufstieg werden alle Pkt darunter auf 0 gesetzt.
+        SPIELSTAND:
+        ${p1N}: Bronze(${p1S[0]}), Silber(${p1S[1]}), Gold(${p1S[2]}), Platin(${p1S[3]})
+        ${p2N}: Bronze(${p2S[0]}), Silber(${p2S[1]}), Gold(${p2S[2]}), Platin(${p2S[3]})
+        EREIGNIS: ${eventType} (z.B. Punkt, Aufstieg, Comeback).
+        PERSÖNLICHKEIT: ${this.mode === 'trash' ? 'Extremer Trash-Talk, sarkastisch, beleidigt den Verlierer leicht' : 'Professioneller TV-Kommentator, sachlich aber begeistert'}.
+        AUFGABE: 2 Sätze Kommentar auf Deutsch.
+        `;
 
         try {
-            // Wir nutzen puter.ai.chat mit einer niedrigen Wortzahl-Vorgabe (implizit durch Prompt)
-            // Puter wählt automatisch das schnellste verfügbare Modell
-            const response = await puter.ai.chat(shortPrompt);
-            const text = response.toString().trim();
-            
-            if (text) {
-                this.speak(text);
-            }
+            const response = await puter.ai.chat(context);
+            this.speak(response.toString());
         } catch (e) {
-            console.error("Speed Error:", e);
-            // Bei Fehler sofortiger Retry ohne Verzögerung
-            this.onScoreChange(p1S, p2S, p1N, p2N, type);
+            console.error("AI Error", e);
+            this.setUI('idle');
         }
     }
 
     speak(text) {
-        // Falls noch was im Puffer ist, sofort löschen
         window.speechSynthesis.cancel();
-        
         this.setUI('speaking');
         this.isSpeaking = true;
-
         const ut = new SpeechSynthesisUtterance(text);
         ut.lang = 'de-DE';
-        
-        // Etwas schnelleres Sprechen wirkt "aufgeregter" und moderner
-        ut.rate = 1.15; 
-        ut.pitch = 1.0;
-        
+        ut.rate = 1.1;
         const voices = window.speechSynthesis.getVoices();
-        // Google Stimmen sind meist schneller in der Initialisierung
-        ut.voice = voices.find(v => v.name.includes("Google") && v.lang.includes("de")) || 
-                   voices.find(v => v.lang.includes("de"));
-
-        ut.onend = () => {
-            this.setUI('idle');
-            this.isSpeaking = false;
-        };
-        
+        ut.voice = voices.find(v => v.name.includes("Google") && v.lang.includes("de")) || voices.find(v => v.lang.includes("de"));
+        ut.onend = () => { this.setUI('idle'); this.isSpeaking = false; };
         window.speechSynthesis.speak(ut);
     }
 
     setUI(state) {
         const orb = document.querySelector('.ai-orb');
-        if (!orb) return;
-        orb.classList.remove('thinking', 'speaking');
-        if (state !== 'idle') orb.classList.add(state);
+        if (orb) {
+            orb.classList.remove('thinking', 'speaking');
+            if (state !== 'idle') orb.classList.add(state);
+        }
     }
 
     toggleMute() {
         this.isMuted = !this.isMuted;
         document.querySelector('.ai-orb').classList.toggle('muted', this.isMuted);
-        if (this.isMuted) window.speechSynthesis.cancel();
     }
 }
 
